@@ -31,3 +31,4 @@ subdirs:
   - udp-echo
   - usb-keyboard
   - usb-serial
+  - wasmi

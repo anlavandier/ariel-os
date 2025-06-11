@@ -1,0 +1,24 @@
+[package]
+name = "wasmi"
+license.workspace = true
+edition.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+ariel-os = { path = "../../src/ariel-os", features = ["alloc"]}
+ariel-os-boards = { path = "../../src/ariel-os-boards" }
+defmt = { workspace = true }
+
+wasmi = { version = "0.47", default-features = false }
+
+[features]
+# default = ["wasmi/wat"]
+
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+opt-level = "z"
