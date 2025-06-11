@@ -2,8 +2,11 @@
 #![no_std]
 
 use ariel_os::debug::{exit, log::{defmt, *}, ExitCode};
+use core::slice;
 
-use wasmi::*;
+use wasmi::{Engine, Module, Linker, Store, Caller};
+
+
 
 #[ariel_os::task(autostart)]
 async fn main() {
@@ -22,7 +25,10 @@ async fn main() {
 
 fn run_wasm() -> Result<u32, wasmi::Error> {
 
-    let wasm  = include_bytes!("../low_mem_example.wasm");
+    // let wasm  = include_bytes!("../low_mem_example.wasm");
+    // the nrf52840 chip has 1MB of flash, we put the wasm at the adress 0xABE60
+    // probe-rs download low_mem_example.wasm --binary-format bin --chip nrf52840_xxAA --base-address 0xABE60
+    let wasm = unsafe { slice::from_raw_parts(0xABE60 as *const u8, 146)};
     // First step is to create the Wasm execution engine with some config.
     // In this example we are using the default configuration.
     let engine = Engine::default();
