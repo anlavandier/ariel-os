@@ -32,3 +32,4 @@ subdirs:
   - usb-keyboard
   - usb-serial
   - wasmi
+  - wasmi-over-udp
