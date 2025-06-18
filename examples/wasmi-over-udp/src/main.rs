@@ -3,13 +3,12 @@
 
 use ariel_os::{debug::{exit, log::{defmt, *}, ExitCode}, net, reexports::embassy_net};
 use embassy_net::udp::{PacketMetadata, UdpSocket};
+use wasmi::{Engine, Module, Linker, Store};
 
-// use core::slice;
-
-use wasmi::{Engine, Module, Linker, Store, Caller};
-
-const BUFFER_SIZE: usize = 1024;
+const BUFFER_SIZE: usize = 128;
 const WASM_BUFFER_SIZE: usize = 1024;
+const USIZE_BYTES: usize = (usize::BITS / 8) as usize;
+
 
 #[ariel_os::task(autostart)]
 async fn main() {
@@ -22,7 +21,7 @@ async fn main() {
     let mut rx_buffer = [0; BUFFER_SIZE];
     let mut tx_meta = [PacketMetadata::EMPTY; 1];
     let mut tx_buffer = [0; BUFFER_SIZE];
-    // let mut buf = [0; BUFFER_SIZE];
+    let mut buf = [0; BUFFER_SIZE];
 
     let mut socket = UdpSocket::new(
         stack,
@@ -40,49 +39,69 @@ async fn main() {
 
     info!("Ready to receive WASM Payload of up to {} bytes", WASM_BUFFER_SIZE);
     let mut wasm_buffer = [0; WASM_BUFFER_SIZE];
-    let file_size = match socket.recv_from(&mut wasm_buffer).await {
+    let file_size = match socket.recv_from(&mut buf).await {
         Ok((0, _)) => {
             0
         },
         Ok((n, _)) => {
-            n
+            assert_eq!(n, USIZE_BYTES);
+            usize::from_be_bytes(buf[..USIZE_BYTES].try_into().expect("Bug"))
         }
         Err(_e) => {
             0
         }
     };
 
-    let wasm_r = run_wasm(&wasm_buffer.split_at(file_size).0);
-    match wasm_r {
-        Ok(v)  => {
-            info!("Got {} by running wasm", v);
-        },
-        Err(e) => {
-            info!("{}", defmt::Display2Format(&e));
+    info!("Received {} as wasm file size", file_size);
+    if file_size > WASM_BUFFER_SIZE {
+        info!("Wasm payload is too big for the allocated buffer");
+        exit(ExitCode::FAILURE);
+    }
+    let mut offset = 0;
+    while offset != file_size {
+        match socket.recv_from(&mut buf).await {
+            Ok((0, _)) => {
+                break;
+            }
+            Ok((n, _)) => {
+                info!("Received {} bytes of the file", n);
+                wasm_buffer[offset..offset+n].copy_from_slice(&buf[..n]);
+                offset+=n;
+
+            },
+            _ => {
+                break;
+            }
         }
     }
+
+    if offset != file_size {
+        info!("Wasm Payload wasn't properly sent");
+        exit(ExitCode::FAILURE);
+    }
+
+    info!("Launching Wasm");
+
+    let wasm_r = run_wasm_main(&wasm_buffer[..file_size]);
+    match wasm_r {
+        Err(e) => {
+            info!("{}", defmt::Display2Format(&e));
+        },
+        Ok(r) => { info!("Got {} from wasm", r)},
+    }
+    exit(ExitCode::SUCCESS);
 }
 
-fn run_wasm(wasm: &[u8]) -> Result<u32, wasmi::Error> {
 
-    // let wasm  = include_bytes!("../low_mem_example.wasm");
-    // the nrf52840 chip has 1MB of flash, we put the wasm at the adress 0xABE60
-    // probe-rs download low_mem_example.wasm --binary-format bin --chip nrf52840_xxAA --base-address 0xABE60
-    // let wasm = unsafe { slice::from_raw_parts(0xABE60 as *const u8, 146)};
+
+/// Function that loads a wasm payload and runs its "main" function
+fn run_wasm_main(wasm: &[u8]) -> Result<u32, wasmi::Error> {
+
     // First step is to create the Wasm execution engine with some config.
     // In this example we are using the default configuration.
     let engine = Engine::default();
     // Now we can compile the above Wasm module with the given Wasm source.
     let module = Module::new(&engine, wasm)?;
-
-
-    //
-    for imp in module.imports() {
-        info!("{:?}", defmt::Debug2Format(&imp));
-    }
-    for exp in module.exports() {
-        info!("{:?}", defmt::Debug2Format(&exp));
-    }
 
     // Wasm objects operate within the context of a Wasm `Store`.
     //
@@ -95,23 +114,29 @@ fn run_wasm(wasm: &[u8]) -> Result<u32, wasmi::Error> {
     // A linker can be used to instantiate Wasm modules.
     // The job of a linker is to satisfy the Wasm module's imports.
 
-    let mut linker = <Linker<HostState>>::new(&engine);
+    let linker = <Linker<HostState>>::new(&engine);
     info!("Created Linker");
-    // We are required to define all imports before instantiating a Wasm module.
-    let _ = linker.func_wrap("host", "host_hello", |caller: Caller<'_, HostState>, param: u32| {
-        info!("Got {} from WebAssembly and my host state is: {}",param, caller.data());
-    })?;
 
+    // let _ = linker.func_wrap::<u32, ()>("log", "info",
+    //     |msg_ptr:u32| {
+
+    //         info!("Got message stored at adress: {:?}", defmt::Debug2Format(&(msg_ptr as *const u8)));
+    //         // let msg = unsafe {
+    //         //     str::from_utf8(slice::from_raw_parts(msg_ptr as *const u8, msg_len as usize))
+    //         // }.unwrap();
+    //         // info!("{}", msg);
+    //     }
+    // )?;
     info!("Linking Done");
+
     let instance = linker.instantiate(&mut store, &module)?
         .start(&mut store)?;
 
     info!("Instantiating done");
-    // Now we can finally query the exported "hello" function and call it.
+    // Now we can finally query the exported "main" function and call it.
     let res = instance
-        .get_typed_func::<(u32, u32), u32>(&store, "add")?
-        .call(&mut store, (2, 2))?;
+        .get_typed_func::<u32, u32>(&store, "main")?
+        .call(&mut store, 42)?;
     Ok(res)
-    // Ok(0)
 }
 
