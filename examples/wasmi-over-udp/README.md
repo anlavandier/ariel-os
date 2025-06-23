@@ -1,4 +1,4 @@
-# hello-world-async
+# wasmi-over-udp
 
 ## About
 

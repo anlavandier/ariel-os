@@ -5697,16 +5697,6 @@ dependencies = [
 
 [[package]]
 name = "wasmi"
-version = "0.0.0"
-dependencies = [
- "ariel-os",
- "ariel-os-boards",
- "defmt 1.0.1",
- "wasmi 0.47.0",
-]
-
-[[package]]
-name = "wasmi"
 version = "0.47.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c63b9ec4d4ba7754a81c6143967a878586d60431970a6dd1ae1b51fe4f4cc28b"
@@ -5722,13 +5712,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "wasmi-example"
+version = "0.0.0"
+dependencies = [
+ "ariel-os",
+ "ariel-os-boards",
+ "defmt 1.0.1",
+ "wasmi",
+]
+
+[[package]]
 name = "wasmi-over-udp"
 version = "0.0.0"
 dependencies = [
  "ariel-os",
  "ariel-os-boards",
  "defmt 1.0.1",
- "wasmi 0.47.0",
+ "wasmi",
 ]
 
 [[package]]

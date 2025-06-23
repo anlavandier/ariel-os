@@ -14,11 +14,3 @@ defmt = { workspace = true }
 
 wasmi = { version = "0.47", default-features = false }
 
-[features]
-# default = ["wasmi/wat"]
-
-
-[profile.release]
-lto = "fat"
-codegen-units = 1
-opt-level = "z"
