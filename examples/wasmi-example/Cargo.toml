@@ -1,5 +1,5 @@
 [package]
-name = "wasmi"
+name = "wasmi-example"
 license.workspace = true
 edition.workspace = true
 publish = false
@@ -13,12 +13,3 @@ ariel-os-boards = { path = "../../src/ariel-os-boards" }
 defmt = { workspace = true }
 
 wasmi = { version = "0.47", default-features = false }
-
-[features]
-# default = ["wasmi/wat"]
-
-
-[profile.release]
-lto = "fat"
-codegen-units = 1
-opt-level = "z"

@@ -1,4 +1,4 @@
-# hello-world-async
+# wasmi-example
 
 ## About
 
