@@ -35,3 +35,4 @@ subdirs:
   - usb-serial
   - wasmi-example
   - wasmi-over-udp
+  - wasmi-explore
