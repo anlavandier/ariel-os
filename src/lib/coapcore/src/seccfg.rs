@@ -202,7 +202,7 @@ pub struct ConfigBuilder {
     as_key_31: Option<[u8; 32]>,
     /// Asymmetric key used when tokens are signed with ES256
     ///
-    /// Alogn with the key, this also holds the audience value of this RS (as signed tokens only
+    /// Along with the key, this also holds the audience value of this RS (as signed tokens only
     /// make sense when the same signing key is used with multiple recipients).
     as_key_neg7: Option<([u8; 32], [u8; 32], heapless::String<MAX_AUD_SIZE>)>,
     unauthenticated_scope: Option<crate::scope::UnionScope>,
@@ -363,8 +363,8 @@ impl ServerSecurityConfig for ConfigBuilder {
         id_cred_x: lakers::IdCred,
     ) -> Option<(lakers::Credential, Self::GeneralClaims)> {
         trace!(
-            "Evaluating peer's credential {=[u8]:02x}", // :02x could be :cbor
-            id_cred_x.as_full_value()
+            "Evaluating peer's credential {}",
+            defmt_or_log::wrappers::Cbor(id_cred_x.as_full_value())
         );
 
         #[expect(
@@ -372,7 +372,10 @@ impl ServerSecurityConfig for ConfigBuilder {
             reason = "Expected to be extended to actual loop soon"
         )]
         for (credential, scope) in &[self.known_edhoc_clients.as_ref()?] {
-            trace!("Comparing to {=[u8]:02x}", credential.bytes.as_slice()); // :02x could be :cbor
+            trace!(
+                "Comparing to {}",
+                defmt_or_log::wrappers::Cbor(credential.bytes.as_slice())
+            );
             if id_cred_x.reference_only() {
                 // ad Ok: If our credential has no KID, it can't be recognized in this branch
                 if credential.by_kid().as_ref() == Ok(&id_cred_x) {

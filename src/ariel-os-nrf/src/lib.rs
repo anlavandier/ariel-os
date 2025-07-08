@@ -6,10 +6,16 @@
 
 pub mod gpio;
 
+mod irqs;
+
 #[doc(hidden)]
 pub mod peripheral {
     pub use embassy_nrf::Peripheral;
 }
+
+#[cfg(feature = "ble")]
+#[doc(hidden)]
+pub mod ble;
 
 #[cfg(feature = "external-interrupts")]
 #[doc(hidden)]
@@ -49,7 +55,7 @@ ariel_os_embassy_common::executor_swi!(SWI0);
 ariel_os_embassy_common::executor_swi!(EGU0_SWI0);
 
 #[cfg(feature = "executor-interrupt")]
-#[cfg(any(context = "nrf5340", context = "nrf91"))]
+#[cfg(any(context = "nrf53", context = "nrf91"))]
 ariel_os_embassy_common::executor_swi!(EGU0);
 
 use embassy_nrf::config::Config;

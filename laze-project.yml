@@ -1,4 +1,4 @@
-laze_required_version: 0.1.33
+laze_required_version: 0.1.37
 
 contexts:
   # base context that all other contexts inherit from
@@ -124,69 +124,82 @@ contexts:
       exec:
         build: false
         cmd:
-          - ${CARGO_PRESHELL} ${CARGO_ENV}
+          - ${CARGO_PRESHELL} ${CARGO_ENV} $@
 
       cargo:
         workdir: ${relpath}
         cmd:
-          - ${CARGO_PRESHELL} ${CARGO_ENV} ${CARGO} ${CARGO_TOOLCHAIN} ${CARGO_ARGS}
+          - ${CARGO_PRESHELL} ${CARGO_ENV} ${CARGO} ${CARGO_TOOLCHAIN} ${CARGO_ARGS} $@
         build: false
 
       run:
         build: false
         workdir: ${appdir}
         cmd:
-          - ${CARGO_PRESHELL} ${CARGO_ENV} ${CARGO} ${CARGO_TOOLCHAIN} ${CARGO_ARGS} run --profile=${PROFILE} ${FEATURES}
+          - ${CARGO_PRESHELL} ${CARGO_ENV} ${CARGO} ${CARGO_TOOLCHAIN} ${CARGO_ARGS} run --profile=${PROFILE} ${FEATURES} $@
 
       clippy:
         build: false
         workdir: ${appdir}
         cmd:
-          - ${CARGO_PRESHELL} ${CARGO_ENV} ${CARGO} ${CARGO_TOOLCHAIN} ${CARGO_ARGS} clippy ${FEATURES}
+          - ${CARGO_PRESHELL} ${CARGO_ENV} ${CARGO} ${CARGO_TOOLCHAIN} ${CARGO_ARGS} clippy ${FEATURES} $@
 
       expand:
         build: false
         workdir: ${appdir}
         cmd:
-          - ${CARGO_PRESHELL} ${CARGO_ENV} ${CARGO} ${CARGO_TOOLCHAIN} ${CARGO_ARGS} expand ${FEATURES}
+          - ${CARGO_PRESHELL} ${CARGO_ENV} ${CARGO} ${CARGO_TOOLCHAIN} ${CARGO_ARGS} expand ${FEATURES} $@
 
       debug:
         workdir: ${appdir}
         cmd:
-          - ${CARGO_PRESHELL} ${CARGO_ENV} ${CARGO} ${CARGO_TOOLCHAIN} ${CARGO_ARGS} run --profile=${PROFILE} ${FEATURES}
+          - ${CARGO_PRESHELL} ${CARGO_ENV} ${CARGO} ${CARGO_TOOLCHAIN} ${CARGO_ARGS} run --profile=${PROFILE} ${FEATURES} $@
         build: false
         ignore_ctrl_c: true
 
       gdb:
         cmd:
-          - arm-none-eabi-gdb -ex "target extended-remote localhost:1337" ${out}
+          - arm-none-eabi-gdb -ex "target extended-remote localhost:1337" ${out} $@
         build: false
         ignore_ctrl_c: true
 
       bloat:
         workdir: ${appdir}
         cmd:
-          - ${CARGO_PRESHELL} ${CARGO_ENV} ${CARGO} ${CARGO_TOOLCHAIN} ${CARGO_ARGS} bloat --profile=${PROFILE} ${FEATURES}
+          - ${CARGO_PRESHELL} ${CARGO_ENV} ${CARGO} ${CARGO_TOOLCHAIN} ${CARGO_ARGS} bloat --profile=${PROFILE} ${FEATURES} $@
         build: false
 
       tree:
         workdir: ${appdir}
         cmd:
-          - ${CARGO_PRESHELL} ${CARGO_ENV} ${CARGO} ${CARGO_TOOLCHAIN} ${CARGO_ARGS} tree ${FEATURES}
+          - ${CARGO_PRESHELL} ${CARGO_ENV} ${CARGO} ${CARGO_TOOLCHAIN} ${CARGO_ARGS} tree ${FEATURES} $@
         build: false
 
       size:
         cmd:
-          - llvm-size ${out}
+          - llvm-size ${out} $@
 
       objdump:
         cmd:
-          - rust-objdump -S ${out}
+          - rust-objdump -S ${out} $@
 
       info-boards:
         build: false
         cmd:
           - echo ${builder}
+
+      vscode-config:
+        help: Generate a VSCode configuration for selected board (select a board with -b)
+        build: false
+        # The --config arg in CARGO_ARGS is pointing to a file relative to the appdir, it makes more sense to generate the config in the appdir
+        workdir: ${appdir}
+        export:
+          - FEATURES
+          - CARGO_TARGET_PREFIX
+          - CARGO_ARGS
+          - CARGO_ENV
+        cmd: # We have to obfuscate the variables to avoid cargo interpreting them since we're running a rust script
+          - _CARGO_TOOLCHAIN='${CARGO_TOOLCHAIN}' ${relroot}/${root}/scripts/vscode.rs
 
   - name: nrf
     help: Nordic MCU support (based on embassy-nrf)
@@ -237,6 +250,8 @@ contexts:
     parent: nrf52
     selects:
       - cortex-m4f
+    provides:
+      - has_nrf_ble
     env:
       PROBE_RS_CHIP: nrf52832_xxAA
 
@@ -244,6 +259,8 @@ contexts:
     parent: nrf52
     selects:
       - cortex-m4f
+    provides:
+      - has_nrf_ble
     env:
       PROBE_RS_CHIP: nrf52833_xxAA
 
@@ -251,6 +268,8 @@ contexts:
     parent: nrf52
     selects:
       - cortex-m4f
+    provides:
+      - has_nrf_ble
     env:
       PROBE_RS_CHIP: nrf52840_xxAA
 
@@ -259,12 +278,27 @@ contexts:
 
   - name: nrf5340
     parent: nrf53
-    provides:
-      - has_storage_support
     selects:
       - cortex-m33f
+    provides:
+      - has_storage_support
     env:
       PROBE_RS_CHIP: nrf5340_xxAA
+
+  - name: nrf5340-net
+    parent: nrf53
+    selects:
+      - cortex-m33
+    provides:
+      - has_hwrng
+      # Currently hard-faults.
+      # - has_storage_support
+    disables:
+      # USB peripheral available only on app core
+      - usb
+    env:
+      PROBE_RS_CHIP: nrf5340_xxAA
+    help: nRF5340 Network Core support
 
   - name: nrf91
     parent: nrf
@@ -314,7 +348,7 @@ contexts:
     tasks:
       debug-rs:
         cmd:
-          - probe-rs debug --chip ${PROBE_RS_CHIP} --exe ${out}
+          - probe-rs debug --chip ${PROBE_RS_CHIP} --exe ${out} $@
 
   - name: rp235xa
     parent: rp
@@ -333,7 +367,7 @@ contexts:
     tasks:
       flash:
         cmd:
-          - picotool load -u -v -x -t elf ${out}
+          - picotool load -u -v -x -t elf ${out} $@
 
   - name: esp
     parent: ariel-os
@@ -425,6 +459,11 @@ contexts:
       - sw/benchmark
     env:
       OPENOCD_ARGS: foo
+    tasks:
+      flash-dfu:
+        cmd:
+          - llvm-objcopy -O binary ${out} ${out}.bin
+          - 'dfu-util -d 0483:df11 -a 0 -s 0x08000000:leave -D ${out}.bin || echo "... Note: dfu-util sometimes fails despite the upload being correct."'
 
   - name: stm32c031c6
     parent: stm32
@@ -522,6 +561,19 @@ contexts:
         - --cfg capability=\"hw/stm32-rng-cryp\"
         - --cfg capability=\"hw/stm32-usb-drd-fs\"
 
+  - name: stm32u585ai
+    parent: stm32
+    selects:
+      - cortex-m33f
+    provides:
+      - has_hwrng
+      - has_storage_support
+    env:
+      PROBE_RS_CHIP: STM32U585AI
+      RUSTFLAGS:
+        - --cfg capability=\"hw/stm32-rng\"
+        - --cfg capability=\"hw/stm32-usb-synopsis\"
+
   - name: stm32wb55rg
     parent: stm32
     selects:
@@ -575,9 +627,10 @@ modules:
     env:
       global:
         RUSTC_TARGET: thumbv7em-none-eabihf
-        CARGO_ENV_TARGET: CARGO_TARGET_THUMBV7EM_NONE_EABIHF
+        CARGO_TARGET_PREFIX: CARGO_TARGET_THUMBV7EM_NONE_EABIHF
         RUSTFLAGS:
           - --cfg armv7m
+          - --cfg armv7m_eabihf
 
   - name: thumbv8m.main-none-eabi
     env:
@@ -594,6 +647,7 @@ modules:
         CARGO_TARGET_PREFIX: CARGO_TARGET_THUMBV8M_MAIN_NONE_EABIHF
         RUSTFLAGS:
           - --cfg armv8m
+          - --cfg armv8m_eabihf
 
   - name: cortex-m
     env:
@@ -639,7 +693,7 @@ modules:
   - name: cortex-m4f
     selects:
       - cortex-m
-      - thumbv7em-none-eabi # actually eabihf, but ariel-os doesn't support hard float yet
+      - thumbv7em-none-eabihf
     env:
       global:
         RUSTFLAGS:
@@ -648,16 +702,25 @@ modules:
   - name: cortex-m7f
     selects:
       - cortex-m
-      - thumbv7em-none-eabi # actually eabihf, but ariel-os doesn't support hard float yet
+      - thumbv7em-none-eabihf
     env:
       global:
         RUSTFLAGS:
           - --cfg context=\"cortex-m7f\"
 
+  - name: cortex-m33
+    selects:
+      - cortex-m
+      - thumbv8m.main-none-eabi
+    env:
+      global:
+        RUSTFLAGS:
+          - --cfg context=\"cortex-m33\"
+
   - name: cortex-m33f
     selects:
       - cortex-m
-      - thumbv8m.main-none-eabi # actually eabihf, but ariel-os doesn't support hard float yet
+      - thumbv8m.main-none-eabihf
     env:
       global:
         RUSTFLAGS:
@@ -941,23 +1004,23 @@ modules:
         help: Erases the whole chip including user data. Unlocks it if locked.
         build: false
         cmd:
-          - probe-rs erase --chip ${PROBE_RS_CHIP} --allow-erase-all
+          - probe-rs erase --chip ${PROBE_RS_CHIP} --allow-erase-all $@
 
       flash:
         help: Flashes the target using probe-rs
         cmd:
-          - probe-rs download --chip ${PROBE_RS_CHIP} ${out}
+          - probe-rs download --chip ${PROBE_RS_CHIP} ${out} $@
           - probe-rs reset --chip ${PROBE_RS_CHIP}
 
       debug:
         help: Starts a probe-rs gdb server
         cmd:
-          - probe-rs gdb --chip ${PROBE_RS_CHIP}
+          - probe-rs gdb --chip ${PROBE_RS_CHIP} $@
 
       reset:
         help: Resets the target
         cmd:
-          - probe-rs reset --chip ${PROBE_RS_CHIP}
+          - probe-rs reset --chip ${PROBE_RS_CHIP} $@
 
   - name: openocd
     tasks:
@@ -1098,6 +1161,17 @@ modules:
       global:
         RUSTFLAGS:
           - --cfg capability=\"hw/ble\"
+
+  - name: has_nrf_ble
+    help: Marks an incompatibility of nrf devices with the interrupt executor (MPSL crashing)
+    context:
+      - nrf52
+    selects:
+      - hwrng
+    provides:
+      - has_ble
+    conflicts:
+      - executor-interrupt
 
   - name: ble-peripheral
     help: Enables BLE peripheral functionality
@@ -1447,7 +1521,7 @@ modules:
         build: false
         workdir: ${appdir}
         cmd:
-          - ${CARGO} test --features _test
+          - ${CARGO} test --features _test $@
 
   - name: embedded-test
     context: ariel-os
@@ -1460,7 +1534,7 @@ modules:
       test:
         workdir: ${appdir}
         cmd:
-          - ${CARGO_ENV} ${CARGO} ${CARGO_TOOLCHAIN} ${CARGO_ARGS} test ${FEATURES}
+          - ${CARGO_ENV} ${CARGO} ${CARGO_TOOLCHAIN} ${CARGO_ARGS} test ${FEATURES} $@
         build: false
 
     env:
@@ -1529,7 +1603,7 @@ builders:
         cmd:
           - echo "Installing c2rust..."
           - 'echo "WARNING: This uses *a lot* of memory!"'
-          - cargo install c2rust
+          - cargo install c2rust $@
 
   - name: nrf52dk
     parent: nrf52832
@@ -1566,7 +1640,7 @@ builders:
       qemu:
         build: true
         cmd:
-          - ${QEMU_SYSTEM_ARM} ${out}
+          - ${QEMU_SYSTEM_ARM} ${out} $@
 
     disables:
       - periph_rtt
@@ -1628,6 +1702,9 @@ builders:
     parent: nrf5340
     provides:
       - has_usb_device_port
+
+  - name: nrf5340dk-net
+    parent: nrf5340-net
 
   - name: st-nucleo-c031c6
     parent: stm32c031c6
@@ -1722,6 +1799,18 @@ builders:
       CARGO_ENV:
         # This ISR is unused on a naked board. Configured here for testing.
         - CONFIG_SWI=LPUART1
+
+  - name: st-steval-mkboxpro
+    parent: stm32u585ai
+    provides:
+      - has_swi
+      - has_usb_device_port
+    env:
+      CARGO_ENV:
+        # This ISR is unused on the eval board.
+        - CONFIG_SWI=USART2
+        # This board needs to disable vbus_detection for USB to work.
+        - CONFIG_VBUS_DETECTION=false
 
   - name: stm32u083c-dk
     parent: stm32u083mc
