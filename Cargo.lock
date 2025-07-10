@@ -5880,6 +5880,7 @@ name = "wasmi-explore"
 version = "0.0.0"
 dependencies = [
  "ariel-os",
+ "ariel-os-bindings",
  "ariel-os-boards",
  "defmt 1.0.1",
  "wasmi",

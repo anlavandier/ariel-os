@@ -6,10 +6,10 @@
 
 use ::core::{str, slice};
 
-use ariel_os::{debug::{exit, log::{defmt, *}, ExitCode}};
+use ariel_os::{debug::{exit, log::{defmt, info}, ExitCode}};
 // use core::slice;
-use wasmi::*;
-use ariel_os_bindings::wasm:log::*;
+use wasmi::{Config, Linker, Engine, Store, Module};
+use ariel_os_bindings::wasm::log::log_str_builder;
 
 
 
@@ -29,7 +29,9 @@ async fn main() {
     exit(ExitCode::SUCCESS);
 }
 
-
+///
+/// # Errors
+/// - When Wasmi isn't happy
 fn run_wasm() -> Result<i32, wasmi::Error> {
     // info!("Trying to run wasm");
 
@@ -60,49 +62,16 @@ fn run_wasm() -> Result<i32, wasmi::Error> {
     // the wasmi::WasmTy trait. In particular, for integers, only u/i 32/64
     // can be used.
 
-    linker.func_wrap("host", "host_hello", |caller: Caller<'_, u32> | info!("Wasm Host with data: {} saying Hello!", caller.data()))?;
-    linker.func_wrap("host", "log", |caller: Caller<'_, u32>, ptr_len: u64| {
-        let str_ptr = (ptr_len >> 32) as usize;
-        let str_len = (ptr_len & (u32::MAX as u64)) as usize;
-        // Get the inner memory that was exported by the module
-        match caller.get_export("memory") {
-            Some(Extern::Memory(mem)) => {
-                // SAFETY: u32 and usize are the same type for our 32 bit architectures
-                // Otherwise we have to trust the input parameters
-                let str_slice = &mem.data(caller.as_context())[str_ptr..str_ptr + str_len];
-                match str::from_utf8(str_slice) {
-                    Ok(string_to_log) => { info!("WASM wanted to say this: {}", string_to_log) },
-                    Err(_) => {info!("Got invalid UTF8 from WASM")}
-                }
-            }
-            _ => unreachable!()
-        }
-    })?;
+    // Using the log_str_builder
+    linker.func_wrap("log", "log_str", log_str_builder())?;
 
     // Initiate Instance with the import function
     let instance = linker.instantiate(&mut store, &module)?.start(&mut store)?;
     info!("Finalized instance");
 
-    // call host function from wasm
-    let wasm_calling_host = instance.get_typed_func::<(), ()>(&store, "hello_from_host")?;
-
-    wasm_calling_host.call(&mut store, ())?;
-
-
     // Allocates a string, and print it using the host capabilities.
     let wasm_logging_static = instance.get_typed_func::<(), ()>(&store, "static_alloc_and_log")?;
-
     wasm_logging_static.call(&mut store, ())?;
 
-    let _wasm_logging_dynamic = instance.get_typed_func::<u32, ()>(&store, "dyn_alloc_and_log");
-    match _wasm_logging_dynamic {
-        Ok(_f) => {
-            _f.call(&mut store, 1).unwrap();
-        }
-        e  => {return Err(e.unwrap_err());}
-    }
-    // let res = wasm_logging_dynamic.call(&mut store, 5);
-
-    // res.map(|()| 0)
     Ok(0)
 }

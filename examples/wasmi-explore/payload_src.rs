@@ -1,43 +1,25 @@
 #![no_std]
 
-use core::panic::PanicInfo;
-extern crate alloc;
+use core::{panic::PanicInfo};
 
-use talc;
 
-#[global_allocator]
-static ALLOCATOR: talc::Talck<talc::locking::AssumeUnlockable, talc::ClaimOnOom> = {
-    // Static 4KiB Arena
-    static mut MEMORY: [u8; 1024] = [0; 1024];
-    let span = talc::Span::from_array(core::ptr::addr_of!(MEMORY).cast_mut());
-    talc::Talc::new(unsafe { talc::ClaimOnOom::new(span) }).lock()
-};
-
-#[link(wasm_import_module="host")]
+// #[ariel-os-bindgen]
+#[link(wasm_import_module="log")]
 unsafe extern "C" {
-    fn host_hello();
-    fn log(ptr_len: u64);
+    fn log_str(ptr: u32, len: u32);
 }
 
-#[unsafe(export_name = "hello_from_host")]
-fn call_host_hello() {
-    unsafe { host_hello() };
+
+/// Would be automatically generated.
+#[inline(always)]
+fn log_safe(input: &str) {
+    unsafe { log_str(input.as_ptr() as u32, input.len() as u32) };
 }
 
 #[unsafe(export_name = "static_alloc_and_log")]
-fn alloc_and_log() {
-    let static_ref: &'static str = "Hello World!";
-    let (ptr, len) = (static_ref.as_ptr(), static_ref.len());
-    let ptr_len = (ptr as u64) << 32 | len as u64;
-    unsafe { log(ptr_len) };
-}
-#[unsafe(export_name = "dyn_alloc_and_log")]
-fn dyn_alloc_and_log(size: u32) {
-    let string = "&".repeat(size as usize);
-    let (ptr, len) = (string.as_ptr(), string.len());
-    let ptr_len = (ptr as u64) << 32 | len as u64;
-    unsafe { log(ptr_len) };
-    drop(string);
+extern "C" fn alloc_log() {
+    let hello = "Hello World";
+    log_safe(hello);
 }
 
 #[panic_handler]
