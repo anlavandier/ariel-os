@@ -1,0 +1,17 @@
+[package]
+name = "ariel-os-bindings"
+version = "0.1.0"
+license.workspace = true
+edition.workspace = true
+repository.workspace = true
+
+[dependencies]
+ariel-os-debug = { workspace = true, features = ["defmt"] }
+
+wasmi = { version = "0.47", default-features = false, optional = true}
+
+[lints]
+workspace = true
+
+[features]
+wasm = ["dep:wasmi"]

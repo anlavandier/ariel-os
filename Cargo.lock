@@ -152,6 +152,7 @@ name = "ariel-os"
 version = "0.2.0"
 dependencies = [
  "ariel-os-bench",
+ "ariel-os-bindings",
  "ariel-os-boards",
  "ariel-os-buildinfo",
  "ariel-os-coap",
@@ -191,6 +192,14 @@ dependencies = [
  "cortex-m",
  "defmt 1.0.1",
  "esp-hal",
+]
+
+[[package]]
+name = "ariel-os-bindings"
+version = "0.1.0"
+dependencies = [
+ "ariel-os-debug",
+ "wasmi",
 ]
 
 [[package]]

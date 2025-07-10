@@ -26,6 +26,7 @@ workspace = true
 document-features = { workspace = true }
 linkme = { workspace = true }
 ariel-os-bench = { workspace = true, optional = true }
+ariel-os-bindings = { workspace = true, optional = true }
 ariel-os-boards = { path = "../ariel-os-boards" }
 ariel-os-buildinfo = { workspace = true }
 ariel-os-coap = { path = "../ariel-os-coap", optional = true }
@@ -191,6 +192,9 @@ executor-thread = ["ariel-os-embassy/executor-thread", "threading"]
 # Don't start any executor automatically.
 # *Used for internal testing only.*
 executor-none = ["ariel-os-embassy/executor-none"]
+
+# Enable the wasm bindings
+wasm-bindings = ["ariel-os-bindings/wasm"]
 
 # features needed for `cargo test`
 _test = ["i2c", "no-boards", "spi", "external-interrupts", "ariel-os-rt/_test"]

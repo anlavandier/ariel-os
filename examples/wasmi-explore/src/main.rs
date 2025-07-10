@@ -9,6 +9,7 @@ use ::core::{str, slice};
 use ariel_os::{debug::{exit, log::{defmt, *}, ExitCode}};
 // use core::slice;
 use wasmi::*;
+use ariel_os_bindings::wasm:log::*;
 
 
 
