@@ -147,3 +147,8 @@ fn SendMyPacket() {
   send_packet(Packet);
 }
 ```
+
+
+### Progress
+
+There's a minimal example of possible a function in the host-side prelude in [src/ariel-os-bindings/src/wasm/log.rs](src/ariel-os-bindings/src/wasm/log.rs) and its usage in this [example](examples/wasmi-explore/src/main.rs)

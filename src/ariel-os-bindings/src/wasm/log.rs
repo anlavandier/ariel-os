@@ -1,8 +1,11 @@
 use ariel_os_debug::log::{defmt::{self, Display2Format}, info};
-use wasmi::{AsContext, Caller, Extern, IntoFunc, WasmTy};
+use wasmi::{AsContext, Caller, Extern, Linker};
 
-#[must_use]
-pub fn log_str_builder<'a, T>() -> impl IntoFunc<T, (Caller<'a, T>, u32, u32), ()> {
+
+/// # Errors
+/// - When the linker complains
+pub fn export_log<T>(linker: &mut Linker<T>) -> Result<&mut Linker<T>, wasmi::errors::LinkerError>{
+    linker.func_wrap("log", "log_str",
     |caller: Caller<'_, T>, str_ptr:u32, str_len: u32| {
         let ptr = str_ptr as usize;
         let len = str_len as usize;
@@ -16,12 +19,5 @@ pub fn log_str_builder<'a, T>() -> impl IntoFunc<T, (Caller<'a, T>, u32, u32), (
             },
             _ => unreachable!(),
         }
-    }
-}
-
-#[must_use]
-pub fn log_builder<'a, T, Input: WasmTy + defmt::Format + core::fmt::Display>() -> impl IntoFunc<T, (Caller<'a, T>, Input), ()> {
-    |_caller: Caller<'_, T>, a: Input| {
-        info!("{}", a);
-    }
+    })
 }

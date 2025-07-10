@@ -9,7 +9,7 @@ use ::core::{str, slice};
 use ariel_os::{debug::{exit, log::{defmt, info}, ExitCode}};
 // use core::slice;
 use wasmi::{Config, Linker, Engine, Store, Module};
-use ariel_os_bindings::wasm::log::log_str_builder;
+use ariel_os_bindings::wasm::log::export_log;
 
 
 
@@ -29,7 +29,6 @@ async fn main() {
     exit(ExitCode::SUCCESS);
 }
 
-///
 /// # Errors
 /// - When Wasmi isn't happy
 fn run_wasm() -> Result<i32, wasmi::Error> {
@@ -57,13 +56,9 @@ fn run_wasm() -> Result<i32, wasmi::Error> {
     // Initiate linker for easier definition of host functions
     let mut linker = Linker::new(&engine);
 
-    // Define a host function through a closure
-    // Host Functions can only have args/return types that implement
-    // the wasmi::WasmTy trait. In particular, for integers, only u/i 32/64
-    // can be used.
 
-    // Using the log_str_builder
-    linker.func_wrap("log", "log_str", log_str_builder())?;
+    // Using the premade bindings
+    export_log(&mut linker)?;
 
     // Initiate Instance with the import function
     let instance = linker.instantiate(&mut store, &module)?.start(&mut store)?;
