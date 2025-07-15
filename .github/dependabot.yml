@@ -1,0 +1,11 @@
+# Configuration file for dependabot
+version: 2
+
+update:
+  - packages-ecosystem: "cargo"
+    # Dir of the workspace manifest
+    directory: "/"
+    schedule:
+      interval: "daily"
+    prefix: "fix(deps)"
+    target-branch: "dependabot-test"
