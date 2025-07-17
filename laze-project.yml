@@ -924,6 +924,16 @@ modules:
         RUSTFLAGS:
           - -Cllvm-args=-inline-threshold -Cllvm-args=225
 
+  - name: panic_immediate_abort
+    context: ariel-os
+    conflicts:
+      - stable
+    env:
+      global:
+        CARGO_ARGS:
+          - -Zbuild-std="core,alloc,panic_abort"
+          - -Zbuild-std-features=panic_immediate_abort
+
   - name: build_std
     context: ariel-os
     conflicts:
