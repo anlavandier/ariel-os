@@ -8,9 +8,14 @@ publish = false
 workspace = true
 
 [dependencies]
-ariel-os = { path = "../../src/ariel-os", features = ["alloc"]}
+ariel-os = { path = "../../src/ariel-os", features = ["alloc", "time", "random"]}
 ariel-os-boards = { path = "../../src/ariel-os-boards" }
 ariel-os-bindings = { path = "../../src/ariel-os-bindings", features = ["wasm"] }
 defmt = { workspace = true }
 
+serde = {version = "*", default-features = false, features = ["derive"]}
+
 wasmi = { version = "0.47", default-features = false }
+zerocopy = { version = "0.8.26", features = ["derive"] }
+
+rand = { workspace = true }
