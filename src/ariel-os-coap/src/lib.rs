@@ -14,6 +14,8 @@ mod udp_nal;
 #[cfg(feature = "coap-server-config-storage")]
 mod stored;
 
+use core::net::{Ipv6Addr, SocketAddr};
+
 use ariel_os_debug::log::info;
 use ariel_os_embassy::cell::SameExecutorCell;
 use coap_handler_implementations::ReportingHandlerBuilder;
@@ -43,7 +45,7 @@ mod demo_setup {
         hex!("72cc4761dbd4c78f758931aa589d348d1ef874a7e303ede2f140dcf3e6aa4aac");
 
     /// Scope usable by any client inside any demo device.
-    const UNAUTHENTICATED_SCOPE: cboritem::CborItem = cbor!([
+    const UNAUTHENTICATED_SCOPE: cboritem::CborItem<'_> = cbor!([
             ["/.well-known/core", 1],
             ["/poem", 1],
             ["/hello", 1],
@@ -52,7 +54,7 @@ mod demo_setup {
     ]);
 
     /// Scope usable by the the administrator of the demo device.
-    const ADMIN_SCOPE: cboritem::CborItem = cbor!([
+    const ADMIN_SCOPE: cboritem::CborItem<'_> = cbor!([
             ["/stdout", 17 / GET and FETCH /],
             ["/.well-known/core", 1],
             ["/poem", 1]
@@ -142,7 +144,7 @@ async fn coap_run_impl(handler: impl coap_handler::Handler + coap_handler::Repor
 
     info!("Starting up CoAP server");
 
-    let local_any = "[::]:5683".parse().unwrap();
+    let local_any = SocketAddr::new(Ipv6Addr::UNSPECIFIED.into(), 5683);
     let mut unconnected = udp_nal::UnconnectedUdp::bind_multiple(socket, local_any)
         .await
         .unwrap();

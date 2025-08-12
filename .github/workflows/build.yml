@@ -14,32 +14,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  check-labels:
     runs-on: ubuntu-24.04
-
+    outputs:
+      label: ${{ steps.get-pr-labels.outputs.result }}
     env:
-      SCCACHE_GHA_ENABLED: "true"
-      RUSTC_WRAPPER: "sccache"
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # clang-sys and thus bindgen is sensitive to multiple installed versions
-      # around, see eg. https://github.com/rust-lang/rust-bindgen/issues/2682
-      #
-      # CLANG_PATH should be set to the most recent clang installed, no matter
-      # what /usr/bin/clang is, for some parts of the code will go for the
-      # newest standard library. It may also need to be aligned with the clang
-      # version which Xtensa provides.
-      CLANG_PATH: /usr/bin/clang-18
-
-    strategy:
-      fail-fast: true
-      matrix:
-        partition: ["1/20", "2/20", "3/20", "4/20", "5/20", "6/20", "7/20", "8/20", "9/20", "10/20", "11/20", "12/20", "13/20", "14/20", "15/20", "16/20", "17/20", "18/20", "19/20", "20/20"]
 
     steps:
-      - name: Free up space
-        run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL &
-
       # Need to get two commits so we can get the PR's commit, not just the
       # merge commit.
       - name: Check out repository code
@@ -80,7 +62,7 @@ jobs:
               }
               const prLabels = pr.labels.map((label) => label.name);
               console.log(`The labels of PR #${prNumber} are ${prLabels}`);
-              const VALID_LABELS = ['ci-build:skip', 'ci-build:small'];
+              const VALID_LABELS = ['ci-build:esp', 'ci-build:full', 'ci-build:native', 'ci-build:nrf', 'ci-build:rp', 'ci-build:skip', 'ci-build:small', 'ci-build:stm32'];
               const buildLabels = prLabels.filter((label) => VALID_LABELS.includes(label));
               if (buildLabels.length > 1) { throw 'Only one build label must be attached.'; }
               const buildLabel = buildLabels[0];
@@ -88,6 +70,37 @@ jobs:
               console.log(`The build label is ${buildLabel}`);
               return buildLabel;
             }
+
+  build:
+    needs: check-labels
+    runs-on: ubuntu-24.04
+    if: ${{ needs.check-labels.outputs.label != 'ci-build:skip' }}
+
+    env:
+      SCCACHE_GHA_ENABLED: "true"
+      RUSTC_WRAPPER: "sccache"
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # clang-sys and thus bindgen is sensitive to multiple installed versions
+      # around, see eg. https://github.com/rust-lang/rust-bindgen/issues/2682
+      #
+      # CLANG_PATH should be set to the most recent clang installed, no matter
+      # what /usr/bin/clang is, for some parts of the code will go for the
+      # newest standard library. It may also need to be aligned with the clang
+      # version which Xtensa provides.
+      CLANG_PATH: /usr/bin/clang-18
+
+    strategy:
+      fail-fast: true
+      matrix:
+        partition: ["1/20", "2/20", "3/20", "4/20", "5/20", "6/20", "7/20", "8/20", "9/20", "10/20", "11/20", "12/20", "13/20", "14/20", "15/20", "16/20", "17/20", "18/20", "19/20", "20/20"]
+
+    steps:
+      - name: Free up space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL &
+
+      - name: Check out repository code
+        uses: actions/checkout@v4
 
       - name: Get git tree hash
         id: get-tree-hash
@@ -99,25 +112,53 @@ jobs:
         id: result-cache
         with:
           path: .tree-hash
-          key: success-${{ steps.get-tree-hash.outputs.hash }}-${{ matrix.partition }}-${{ github.event_name == 'schedule' && 'full' || 'limited' }}
+          key: success-${{ steps.get-tree-hash.outputs.hash }}-${{ matrix.partition }}-${{ github.event_name == 'schedule' && 'full' || needs.check-labels.outputs.label }}
 
       - name: Whether to skip next steps
         id: should-skip
         run: |
-          result="result=${{ steps.result-cache.outputs.cache-hit == 'true' || steps.get-pr-labels.outputs.result == 'ci-build:skip' }}"
+          result="result=${{ steps.result-cache.outputs.cache-hit == 'true' }}"
           echo "${result}"
           echo "${result}" >> $GITHUB_OUTPUT
 
+      - name: "limit build unless nightly build"
+        if: github.event_name != 'schedule' && steps.should-skip.outputs.result != 'true'
+        run: |
+          case '${{ needs.check-labels.outputs.label }}' in
+            'ci-build:esp')
+              echo "LAZE_BUILDERS=ai-c3,espressif-esp32-c3-lcdkit,espressif-esp32-c6-devkitc-1,espressif-esp32-devkitc,espressif-esp32-s3-devkitc-1" >> "$GITHUB_ENV"
+              ;;
+            'ci-build:full')
+              # Not setting `LAZE_BUILDERS` so that the build is not limited
+              ;;
+            'ci-build:native')
+              echo "LAZE_BUILDERS=native" >> "$GITHUB_ENV"
+              ;;
+            'ci-build:nrf')
+              # Purely redundant boards are excluded for now.
+              echo "LAZE_BUILDERS=bbc-microbit-v1,bbc-microbit-v2,nordic-thingy-91-x-nrf9151,nrf52840dk,nrf52dk,nrf5340dk,nrf5340dk-net,nrf9160dk-nrf9160" >> "$GITHUB_ENV"
+              ;;
+            'ci-build:rp')
+              echo "LAZE_BUILDERS=rpi-pico,rpi-pico2,rpi-pico2-w,rpi-pico-w" >> "$GITHUB_ENV"
+              ;;
+            'ci-build:small')
+              echo "LAZE_BUILDERS=ai-c3,espressif-esp32-devkitc,espressif-esp32-c6-devkitc-1,espressif-esp32-s3-devkitc-1,bbc-microbit-v2,native,nrf52840dk,nrf5340dk,rpi-pico,rpi-pico-w,st-nucleo-c031c6,st-nucleo-h755zi-q,st-nucleo-wb55" >> "$GITHUB_ENV"
+              ;;
+            'ci-build:stm32')
+              echo "LAZE_BUILDERS=st-b-l475e-iot01a,st-steval-mkboxpro,st-nucleo-c031c6,st-nucleo-f042k6,st-nucleo-f401re,st-nucleo-f411re,st-nucleo-f767zi,st-nucleo-h755zi-q,st-nucleo-wb55,st-nucleo-wba55,stm32u083c-dk" >> "$GITHUB_ENV"
+              ;;
+          esac
+
       - name: Run sccache-cache
-        if: steps.result-cache.outputs.cache-hit != 'true'
+        if: steps.should-skip.outputs.result != 'true'
         uses: mozilla-actions/sccache-action@v0.0.8
 
       - id: get_toolchain
-        if: steps.result-cache.outputs.cache-hit != 'true'
+        if: steps.should-skip.outputs.result != 'true'
         run: echo "toolchain=$(scripts/rust-toolchain.sh)" >> $GITHUB_OUTPUT
 
       - name: Install nightly toolchain
-        if: steps.result-cache.outputs.cache-hit != 'true'
+        if: steps.should-skip.outputs.result != 'true'
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ steps.get_toolchain.outputs.toolchain }}
@@ -127,7 +168,7 @@ jobs:
           components: rust-src, rustfmt
 
       - name: Install stable toolchain
-        if: steps.result-cache.outputs.cache-hit != 'true'
+        if: steps.should-skip.outputs.result != 'true'
         # configure MSRV here:
         uses: dtolnay/rust-toolchain@1.85
         with:
@@ -137,7 +178,7 @@ jobs:
           components: rust-src, rustfmt
 
       - name: Install Rust for Xtensa
-        if: steps.result-cache.outputs.cache-hit != 'true'
+        if: steps.should-skip.outputs.result != 'true' && (env.LAZE_BUILDERS == null || contains(env.LAZE_BUILDERS, 'esp32-s3'))
         # No tag yet after https://github.com/esp-rs/xtensa-toolchain/pull/38 (will probably be @v1.5.5)
         uses: esp-rs/xtensa-toolchain@main
         with:
@@ -147,19 +188,19 @@ jobs:
           export: false
 
       - name: rust cache
-        if: steps.result-cache.outputs.cache-hit != 'true'
+        if: steps.should-skip.outputs.result != 'true'
         uses: Swatinem/rust-cache@v2
         with:
           key: "${{ matrix.partition }}"
 
       - name: Install laze
         uses: taiki-e/install-action@v2
-        if: steps.result-cache.outputs.cache-hit != 'true'
+        if: steps.should-skip.outputs.result != 'true'
         with:
           tool: laze@0.1
 
       - name: "installing prerequisites"
-        if: steps.result-cache.outputs.cache-hit != 'true'
+        if: steps.should-skip.outputs.result != 'true'
         run: sudo apt-get install ninja-build gcc-arm-none-eabi gcc-riscv64-unknown-elf
 
       - name: "Show installed versions"
@@ -181,28 +222,24 @@ jobs:
           sha256sum /usr/lib/llvm-*/lib/clang/*/include/stdint.h
           true
 
-      - name: "limit build unless nightly build"
-        if: github.event_name != 'schedule' && steps.result-cache.outputs.cache-hit != 'true'
-        run: |
-          echo "LAZE_BUILDERS=ai-c3,espressif-esp32-devkitc,espressif-esp32-c6-devkitc-1,espressif-esp32-s3-devkitc-1,bbc-microbit-v2,nrf52840dk,nrf5340dk,rpi-pico,rpi-pico-w,st-nucleo-c031c6,st-nucleo-h755zi-q,st-nucleo-wb55" >> "$GITHUB_ENV"
-
       - name: "ariel-os compilation test (default toolchain)"
-        if: steps.result-cache.outputs.cache-hit != 'true'
+        if: steps.should-skip.outputs.result != 'true'
         run: |
           sccache --start-server || true # work around https://github.com/ninja-build/ninja/issues/2052
 
+          echo "LAZE_BUILDERS=${LAZE_BUILDERS}"
           CONFIG_WIFI_NETWORK='test' CONFIG_WIFI_PASSWORD='password' laze build -DCARGO_ARGS+='--locked' --global --partition hash:${{ matrix.partition }}
 
       # cleanup previous build artifacts. do in background (no need to wait).
       - name: "cleanup stable build artifacts"
-        if: github.event_name == 'schedule' && steps.result-cache.outputs.cache-hit != 'true'
+        if: github.event_name == 'schedule' && steps.should-skip.outputs.result != 'true'
         run: |
           mv build build.tmp && rm -rf build.tmp &
 
       # nightly build, nightly toolchain
       # (disabling xtensa here as it gets built by the default toolchain build above)
       - name: "ariel-os compilation test (nightly toolchain)"
-        if: github.event_name == 'schedule' && steps.result-cache.outputs.cache-hit != 'true'
+        if: github.event_name == 'schedule' && steps.should-skip.outputs.result != 'true'
         run: |
           sccache --start-server || true # work around https://github.com/ninja-build/ninja/issues/2052
 
@@ -212,7 +249,7 @@ jobs:
     if: ${{ always() }}
     runs-on: ubuntu-latest
     name: Final Results
-    needs: [build]
+    needs: [build, check-labels]
     steps:
       - run: |
           result="${{ needs.build.result }}"

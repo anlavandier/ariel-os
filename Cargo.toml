@@ -22,6 +22,7 @@ members = [
   "src/ariel-os-power",
   "src/ariel-os-random",
   "src/ariel-os-rp",
+  "src/ariel-os-sensors",
   "src/ariel-os-stm32",
   "src/ariel-os-storage",
   "tests/benchmarks/bench_sched_flags",
@@ -57,7 +58,7 @@ cortex-m = { version = "0.7", default-features = false, features = [
 ] }
 cortex-m-rt = { version = "0.7.5" }
 cortex-m-semihosting = { version = "0.5" }
-critical-section = { version = "1.1.2" }
+critical-section = { version = "1.2.0" }
 featurecomb = "0.1.3"
 # Disabling default features may reduce the code size by not providing atomics
 # for types larger than the pointer width, which we do not use.
@@ -88,7 +89,6 @@ embedded-storage = { version = "0.3.1" }
 embedded-storage-async = { version = "0.4.1" }
 embedded-test = { version = "0.6.1", default-features = false, features = [
   "ariel-os",
-  "semihosting",
 ] }
 
 esp-alloc = { version = "0.6.0", default-features = false }
@@ -119,12 +119,14 @@ ariel-os-embassy-common = { path = "src/ariel-os-embassy-common" }
 ariel-os-esp = { path = "src/ariel-os-esp" }
 ariel-os-hal = { path = "src/ariel-os-hal", default-features = false }
 ariel-os-identity = { path = "src/ariel-os-identity" }
+ariel-os-macros = { path = "src/ariel-os-macros" }
 ariel-os-nrf = { path = "src/ariel-os-nrf" }
 ariel-os-power = { path = "src/ariel-os-power" }
 ariel-os-random = { path = "src/ariel-os-random" }
 ariel-os-rp = { path = "src/ariel-os-rp" }
 ariel-os-rt = { path = "src/ariel-os-rt" }
 ariel-os-runqueue = { path = "src/ariel-os-runqueue" }
+ariel-os-sensors = { path = "src/ariel-os-sensors" }
 ariel-os-stm32 = { path = "src/ariel-os-stm32" }
 ariel-os-storage = { path = "src/ariel-os-storage" }
 ariel-os-threads = { path = "src/ariel-os-threads" }
@@ -143,6 +145,7 @@ once_cell = { version = "=1.19.0", default-features = false, features = [
   "critical-section",
 ] }
 paste = { version = "1.0" }
+pin-project = "1.1.10"
 rand = { version = "0.8.5", default-features = false }
 rand_core = { version = "0.6.4", default-features = false }
 rtt-target = { version = "0.6.0" }
@@ -152,7 +155,7 @@ serde = { version = "1.0.197", default-features = false }
 static_cell = { version = "2.1.1", default-features = false }
 trouble-host = "0.1"
 bt-hci = { version = "0.2.0" }
-nrf-sdc = { git = "https://github.com/alexmoon/nrf-sdc.git", rev = "551a95436e999b4290b4a33383aa3d6747b63dd9" }
+nrf-sdc = { git = "https://github.com/ariel-os/nrf-sdc.git", rev = "8ce4780b691ec6850b05a0382cef395846b67e02" }
 
 [workspace.lints.rust]
 # rustc lints are documented here: https://doc.rust-lang.org/rustc/lints/listing/index.html

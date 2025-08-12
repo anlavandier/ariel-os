@@ -26,9 +26,9 @@ It explains how to compile and run the `hello-word` example to verify your setup
 1. Only for using ESP devices, install [espup](https://github.com/esp-rs/espup) and related tools:
 
    ```sh
-   cargo install espup
+   cargo install espup --locked
    espup install
-   cargo install espflash
+   cargo install espflash@3.3.0 --locked
    ```
 
    There is no need to actively source the `~/export-esp.sh` file which `espup` produces:

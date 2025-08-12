@@ -37,6 +37,7 @@ ariel-os-macros = { path = "../ariel-os-macros" }
 ariel-os-power = { path = "../ariel-os-power" }
 ariel-os-random = { workspace = true, optional = true }
 ariel-os-rt = { path = "../ariel-os-rt" }
+ariel-os-sensors = { workspace = true, optional = true }
 ariel-os-storage = { workspace = true, optional = true }
 ariel-os-threads = { path = "../ariel-os-threads", optional = true }
 ariel-os-utils = { workspace = true }
@@ -66,6 +67,9 @@ random = ["dep:ariel-os-random", "ariel-os-embassy/random"]
 csprng = ["dep:ariel-os-random", "ariel-os-random?/csprng"]
 # Enables seeding the random number generator from hardware.
 hwrng = ["ariel-os-embassy/hwrng"]
+# Enables support for sensors.
+# *Currently experimental and undocumented.*
+sensors = ["dep:ariel-os-sensors"]
 
 #! ## Network protocols
 ## Enables support for TCP.
@@ -124,9 +128,11 @@ core-affinity = ["multi-core", "ariel-os-threads?/core-affinity"]
 # Exactly one of the features below must be enabled at once.
 # Selection of these should be done through laze configuration.
 # Enables one single core, even if the hardware provides multiple cores.
-single-core = ["ariel-os-rt/single-core"]
+single-core = ["ariel-os-threads?/single-core", "ariel-os-rt/single-core"]
 # Enables support for SMP.
 multi-core = ["ariel-os-threads?/multi-core", "ariel-os-rt/multi-core"]
+# Enables support for infinite cores.
+infini-core = ["ariel-os-threads?/infini-core"]
 
 # ## Network type selection
 # At most one of the features below can be enabled at once.
@@ -144,6 +150,8 @@ eth-stm32 = ["ariel-os-embassy/eth-stm32"]
 
 # ## Bluetooth support
 ble = ["ariel-os-embassy/ble"]
+# Selects BLE (with the CYW43 chip).
+ble-cyw43 = ["ariel-os-embassy/ble-cyw43"]
 # Enables BLE to act as a peripheral. Can be used in conjunction with `ble-central`.
 ble-peripheral = ["ble", "ariel-os-embassy/ble-peripheral"]
 # Enables BLE to act as a central. Can be used in conjunction with `ble-peripheral`.

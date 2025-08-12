@@ -15,7 +15,7 @@ pub trait Arch {
     /// it starts executing `func` with argument `arg`.
     /// Furthermore, it sets up the link-register with the [`crate::cleanup`] function that
     /// will be executed after the thread function returned.
-    fn setup_stack(thread: &mut Thread, stack: &mut [u8], func: usize, arg: usize);
+    fn setup_stack(thread: &mut Thread, stack: &mut [u8], func: fn(), arg: Option<usize>);
 
     /// Trigger a context switch.
     fn schedule();
@@ -26,6 +26,14 @@ pub trait Arch {
     /// Prompts the CPU to enter deep sleep until an interrupt occurs.
     #[allow(dead_code, reason = "used in scheduler implementation")]
     fn wfi();
+
+    /// Mark thread `running`.
+    #[cfg(feature = "infini-core")]
+    fn set_running(_thread_id: crate::ThreadId) {}
+
+    /// Mark thread `stopped`.
+    #[cfg(feature = "infini-core")]
+    fn set_stopped(_thread_id: crate::ThreadId) {}
 }
 
 cfg_if::cfg_if! {
@@ -38,13 +46,16 @@ cfg_if::cfg_if! {
     } else if #[cfg(context = "xtensa")] {
         mod xtensa;
         pub use xtensa::Cpu;
+    } else if #[cfg(context = "native")] {
+        mod native;
+        pub use native::Cpu;
     } else {
         pub struct Cpu;
         impl Arch for Cpu {
             type ThreadData = ();
             const DEFAULT_THREAD_DATA: Self::ThreadData = ();
 
-            fn setup_stack( _: &mut Thread, _: &mut [u8], _: usize, _: usize) {
+            fn setup_stack( _: &mut Thread, _: &mut [u8], _: fn(), _: Option<usize>) {
                 unimplemented!()
             }
             fn start_threading() {

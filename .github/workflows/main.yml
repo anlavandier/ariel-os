@@ -120,6 +120,7 @@ jobs:
                 mdns,
                 net,
                 no-boards,
+                sensors,
                 spi,
                 storage,
                 tcp,
@@ -141,6 +142,7 @@ jobs:
             -p ariel-os-power
             -p ariel-os-random
             -p ariel-os-rt
+            -p ariel-os-sensors
             -p ariel-os-storage
             -p ariel-os-threads
             -p ariel-os-utils
@@ -166,7 +168,7 @@ jobs:
             --
             --deny warnings
 
-      - run: echo 'RUSTFLAGS=--cfg context="rp" --cfg context="rp2040"' >> $GITHUB_ENV
+      - run: echo 'RUSTFLAGS=--cfg context="cortex-m" --cfg context="rp" --cfg context="rp2040"' >> $GITHUB_ENV
       - name: clippy for RP
         uses: clechasseur/rs-clippy-check@v3
         with:
@@ -174,6 +176,8 @@ jobs:
             --verbose
             --locked
             --features "
+                ble,
+                ble-cyw43,
                 embassy-rp/rp2040,
                 external-interrupts,
                 i2c,
@@ -272,6 +276,7 @@ jobs:
                     no-boards,
                     random,
                     ariel-os-coap/doc,
+                    sensors,
                     spi,
                     storage,
                     tcp,
