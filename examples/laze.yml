@@ -6,6 +6,7 @@ defaults:
 subdirs:
   - alloc
   - benchmark
+  - bindings-comp
   - ble-advertiser
   - ble-scanner
   - blinky

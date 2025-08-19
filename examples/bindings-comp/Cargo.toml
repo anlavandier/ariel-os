@@ -1,0 +1,23 @@
+[package]
+name = "bindings-comp"
+license.workspace = true
+edition.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+ariel-os = { path = "../../src/ariel-os", features = ["alloc", "time", "random"]}
+ariel-os-boards = { path = "../../src/ariel-os-boards" }
+ariel-os-bindings = { path = "../../src/ariel-os-bindings", features = ["wasm-host", "rng"] }
+defmt = { workspace = true }
+
+wasmtime = { git = "https://github.com/bytecodealliance/wasmtime", rev= "0e6d9c679f5df5cf712357f147088bbce0c61fe9", default-features = false, features = ["runtime", "pulley", "component-model"] }
+
+
+rand_core = { workspace = true }
+
+[features]
+handwritten = []
+with_component_model = []

@@ -6,12 +6,19 @@ edition.workspace = true
 repository.workspace = true
 
 [dependencies]
-ariel-os-debug = { workspace = true, features = ["defmt"] }
+ariel-os-debug = { workspace = true, features = ["defmt"], optional = true }
+ariel-os-random = { workspace = true, optional = true }
+ariel-os-alloc = {workspace = true, optional = true }
+rand_core = { workspace = true, optional = true }
 
 wasmi = { version = "0.47", default-features = false, optional = true}
+wasmtime = { git = "https://github.com/bytecodealliance/wasmtime", rev= "0e6d9c679f5df5cf712357f147088bbce0c61fe9", default-features = false, features = ["runtime", "pulley", "component-model"], optional = true}
 
 [lints]
 workspace = true
 
 [features]
-wasm = ["dep:wasmi"]
+wasm-host = ["dep:wasmtime", "dep:wasmi"]
+log = ["dep:ariel-os-debug", "dep:ariel-os-alloc"]
+rng = ["dep:rand_core", "dep:ariel-os-random"]
+wasm-client = []
