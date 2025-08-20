@@ -123,7 +123,7 @@ jobs:
 
       - name: Run sccache-cache
         if: steps.should-skip.outputs.result != 'true'
-        uses: mozilla-actions/sccache-action@v0.0.8
+        uses: mozilla-actions/sccache-action@7d986dd989559c6ecdb630a3fd2557667be217ad # v0.0.9
 
       - id: get_toolchain
         if: steps.should-skip.outputs.result != 'true'
