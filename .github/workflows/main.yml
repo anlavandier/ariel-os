@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
 
       - id: get_toolchain
         run: echo "toolchain=$(scripts/rust-toolchain.sh)" >> $GITHUB_OUTPUT
@@ -30,7 +30,7 @@ jobs:
           toolchain: ${{ steps.get_toolchain.outputs.toolchain }}
 
       - name: Install laze
-        uses: taiki-e/install-action@v2
+        uses: taiki-e/install-action@ad95d4e02e061d4390c4b66ef5ed56c7fee3d2ce # v2
         with:
           tool: laze@0.1
 
@@ -38,7 +38,7 @@ jobs:
         run: sudo apt-get install ninja-build gcc-arm-none-eabi
 
       - name: rust cache
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@98c8021b550208e191a6a3145459bfc9fb29c4c0 # v2
 
       - name: Run host-side crate tests
         run: laze build -DCARGO_ARGS+='--locked' --builders host --multiple-tasks --global --keep-going=0 test
@@ -48,7 +48,7 @@ jobs:
 
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
 
       # "Obfuscate" the search query with concatenation so it does not self-trigger.
       - name: Check for leftover occurrences of the old project name
@@ -79,10 +79,10 @@ jobs:
           components: clippy, rustfmt
 
       - name: rust cache
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@98c8021b550208e191a6a3145459bfc9fb29c4c0 # v2
 
       - name: Install cargo-deny
-        uses: taiki-e/install-action@v2
+        uses: taiki-e/install-action@ad95d4e02e061d4390c4b66ef5ed56c7fee3d2ce # v2
         with:
           tool: cargo-deny
 
@@ -103,7 +103,7 @@ jobs:
       # TODO: we'll eventually want to check relevant feature combinations
       # TODO: we may want to use --no-deps as well
       - name: clippy
-        uses: clechasseur/rs-clippy-check@v3
+        uses: clechasseur/rs-clippy-check@50a0fd6f2f1a33307d603ee50d91eadbb2561120 # v3
         with:
           args: |
             --verbose
@@ -149,7 +149,7 @@ jobs:
 
       - run: echo 'RUSTFLAGS=--cfg context="esp32c6"' >> $GITHUB_ENV
       - name: clippy for ESP32
-        uses: clechasseur/rs-clippy-check@v3
+        uses: clechasseur/rs-clippy-check@50a0fd6f2f1a33307d603ee50d91eadbb2561120 # v3
         with:
           args: |
             --verbose
@@ -168,7 +168,7 @@ jobs:
 
       - run: echo 'RUSTFLAGS=--cfg context="rp" --cfg context="rp2040"' >> $GITHUB_ENV
       - name: clippy for RP
-        uses: clechasseur/rs-clippy-check@v3
+        uses: clechasseur/rs-clippy-check@50a0fd6f2f1a33307d603ee50d91eadbb2561120 # v3
         with:
           args: |
             --verbose
@@ -185,7 +185,7 @@ jobs:
 
       - run: echo 'RUSTFLAGS=--cfg context="nrf52840" --cfg context="nrf52"' >> $GITHUB_ENV
       - name: clippy for nRF
-        uses: clechasseur/rs-clippy-check@v3
+        uses: clechasseur/rs-clippy-check@50a0fd6f2f1a33307d603ee50d91eadbb2561120 # v3
         with:
           args: |
             --verbose
@@ -205,7 +205,7 @@ jobs:
 
       - run: echo 'RUSTFLAGS=--cfg context="stm32wb55rg"' >> $GITHUB_ENV
       - name: clippy for STM32
-        uses: clechasseur/rs-clippy-check@v3
+        uses: clechasseur/rs-clippy-check@50a0fd6f2f1a33307d603ee50d91eadbb2561120 # v3
         with:
           args: |
             --verbose
@@ -221,7 +221,7 @@ jobs:
             --deny warnings
 
       - name: clippy
-        uses: clechasseur/rs-clippy-check@v3
+        uses: clechasseur/rs-clippy-check@50a0fd6f2f1a33307d603ee50d91eadbb2561120 # v3
         with:
           args: |
             --locked
@@ -234,7 +234,7 @@ jobs:
 
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
 
       - id: get_toolchain
         run: echo "toolchain=$(scripts/rust-toolchain.sh)" >> $GITHUB_OUTPUT
@@ -247,7 +247,7 @@ jobs:
           components: rust-src
 
       - name: rust cache
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@98c8021b550208e191a6a3145459bfc9fb29c4c0 # v2
 
       - name: rustdoc
         run: |
@@ -338,7 +338,7 @@ jobs:
 
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
 
       - name: rustfmt
         run: cargo fmt --check --all
@@ -348,7 +348,7 @@ jobs:
 
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
 
       - name: yamllint
         uses: karancode/yamllint-github-action@master
@@ -361,10 +361,10 @@ jobs:
 
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
 
       - name: Install taplo
-        uses: taiki-e/install-action@v2
+        uses: taiki-e/install-action@ad95d4e02e061d4390c4b66ef5ed56c7fee3d2ce # v2
         with:
           tool: taplo-cli
 
@@ -376,10 +376,10 @@ jobs:
 
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
 
       - name: Ruff
-        uses: chartboost/ruff-action@v1
+        uses: chartboost/ruff-action@e18ae971ccee1b2d7bbef113930f00c670b78da4 # v1
         with:
           args: format --check # Only check formatting for now
 
@@ -388,10 +388,10 @@ jobs:
 
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
 
       - name: typos
-        uses: crate-ci/typos@v1.34.0
+        uses: crate-ci/typos@392b78fe18a52790c53f42456e46124f77346842 # v1.34.0
 
       - name: Check the support matrix generation exit code
         run: |
@@ -399,7 +399,7 @@ jobs:
           ./doc/gen_support_matrix_html.rs generate doc/support_matrix.yml /dev/null --tier 2
 
       - name: Install mdbook and mdbook utils
-        uses: taiki-e/install-action@v2
+        uses: taiki-e/install-action@ad95d4e02e061d4390c4b66ef5ed56c7fee3d2ce # v2
         with:
           tool: mdbook, mdbook-cmdrun
 
@@ -414,7 +414,7 @@ jobs:
           mdbook build
 
       - name: Link Checker
-        uses: lycheeverse/lychee-action@v2
+        uses: lycheeverse/lychee-action@5c4ee84814c983aa7164eaee476f014e53ff3963 # v2
         with:
           args: --offline --require-https --no-progress --include-fragments --include-verbatim -v '*.md' book/book
           fail: true
