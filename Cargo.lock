@@ -4888,9 +4888,9 @@ dependencies = [
 
 [[package]]
 name = "semihosting"
-version = "0.1.18"
+version = "0.1.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d00d0037a88d97379cc27d815a471350923a1dc5880d5325c49695edcdc0d37"
+checksum = "c3e1c7d2b77d80283c750a39c52f1ab4d17234e8f30bca43550f5b2375f41d5f"
 
 [[package]]
 name = "semver"
