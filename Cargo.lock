@@ -1206,9 +1206,9 @@ dependencies = [
 
 [[package]]
 name = "coap-numbers"
-version = "0.2.4"
+version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6d78a5634393ab2c11d173d66107200a730e200a3b3ca063c344d4459c90a5f9"
+checksum = "62940de3d016deb4c2e8bf5062435d69eba7f2c64b35537de4c56586db52231c"
 
 [[package]]
 name = "coap-request"
