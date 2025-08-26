@@ -1,3 +1,5 @@
+# This workflow is documented in the Developer Guide, in the book.
+
 name: Build
 
 on:
@@ -54,7 +56,13 @@ jobs:
             // Would be incorrect if multiple PRs are open for exactly the same commit.
             for (const pr of items) {
               const prNumber = pr.number;
-              const { data: commits } = await github.rest.pulls.listCommits({ owner: 'ariel-os', repo: 'ariel-os', pull_number: prNumber });
+              const { data: commits } = await github.rest.pulls.listCommits({
+                owner: 'ariel-os',
+                repo: 'ariel-os',
+                pull_number: prNumber,
+                per_page: 100
+              });
+              // TODO: handle pagination
               const tipCommitId = commits[commits.length - 1].sha;
               if (tipCommitId != commitId) {
                 console.log(`Wrong PR: tip is ${tipCommitId}`);
@@ -62,7 +70,7 @@ jobs:
               }
               const prLabels = pr.labels.map((label) => label.name);
               console.log(`The labels of PR #${prNumber} are ${prLabels}`);
-              const VALID_LABELS = ['ci-build:full', 'ci-build:rp', 'ci-build:skip', 'ci-build:small'];
+              const VALID_LABELS = ['ci-build:esp', 'ci-build:full', 'ci-build:native', 'ci-build:nrf', 'ci-build:rp', 'ci-build:skip', 'ci-build:small', 'ci-build:stm32'];
               const buildLabels = prLabels.filter((label) => VALID_LABELS.includes(label));
               if (buildLabels.length > 1) { throw 'Only one build label must be attached.'; }
               const buildLabel = buildLabels[0];
@@ -70,15 +78,16 @@ jobs:
               console.log(`The build label is ${buildLabel}`);
               return buildLabel;
             }
+            // This can happen because the API is paginated.
+            throw 'Did not find the PR; maybe it has more than 30 commits?';
 
   build:
     needs: check-labels
     runs-on: ubuntu-24.04
-    if: ${{ needs.check-labels.outputs.label != 'ci-build:skip' }}
+    # Ignore the PR labels in nightly builds.
+    if: ${{ github.event_name == 'schedule' || needs.check-labels.outputs.label != 'ci-build:skip' }}
 
     env:
-      SCCACHE_GHA_ENABLED: "true"
-      RUSTC_WRAPPER: "sccache"
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # clang-sys and thus bindgen is sensitive to multiple installed versions
       # around, see eg. https://github.com/rust-lang/rust-bindgen/issues/2682
@@ -97,7 +106,17 @@ jobs:
     steps:
       - name: Free up space
         run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL &
+          sudo rm -rf \
+            /opt/ghc \
+            /opt/hostedtoolcache/CodeQL \
+            /usr/lib/jvm \
+            /usr/local/julia* \
+            /usr/local/lib/android \
+            /usr/local/share/chromium \
+            /usr/local/share/powershell \
+            /usr/share/dotnet \
+            /usr/share/swift \
+            &
 
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -112,7 +131,7 @@ jobs:
         id: result-cache
         with:
           path: .tree-hash
-          key: success-${{ steps.get-tree-hash.outputs.hash }}-${{ matrix.partition }}-${{ github.event_name == 'schedule' && 'full' || 'limited' }}
+          key: success-${{ steps.get-tree-hash.outputs.hash }}-${{ matrix.partition }}-${{ github.event_name == 'schedule' && 'full' || needs.check-labels.outputs.label }}
 
       - name: Whether to skip next steps
         id: should-skip
@@ -121,9 +140,38 @@ jobs:
           echo "${result}"
           echo "${result}" >> $GITHUB_OUTPUT
 
-      - name: Run sccache-cache
-        if: steps.should-skip.outputs.result != 'true'
-        uses: mozilla-actions/sccache-action@v0.0.8
+      - name: "limit build unless nightly build"
+        if: github.event_name != 'schedule' && steps.should-skip.outputs.result != 'true'
+        run: |
+          case '${{ needs.check-labels.outputs.label }}' in
+            'ci-build:esp')
+              echo "LAZE_BUILDERS=ai-c3,espressif-esp32-c3-lcdkit,espressif-esp32-c6-devkitc-1,espressif-esp32-devkitc,espressif-esp32-s3-devkitc-1,heltec-wifi-lora-32-v3" >> "$GITHUB_ENV"
+              ;;
+            'ci-build:full')
+              # Not setting `LAZE_BUILDERS` so that the build is not limited
+              ;;
+            'ci-build:native')
+              echo "LAZE_BUILDERS=native" >> "$GITHUB_ENV"
+              ;;
+            'ci-build:nrf')
+              # Purely redundant boards are excluded for now.
+              echo "LAZE_BUILDERS=bbc-microbit-v1,bbc-microbit-v2,nordic-thingy-91-x-nrf9151,nrf52840dk,nrf52dk,nrf5340dk,nrf5340dk-net,nrf9160dk-nrf9160" >> "$GITHUB_ENV"
+              ;;
+            'ci-build:rp')
+              echo "LAZE_BUILDERS=rpi-pico,rpi-pico2,rpi-pico2-w,rpi-pico-w" >> "$GITHUB_ENV"
+              ;;
+            'ci-build:small')
+              echo "LAZE_BUILDERS=ai-c3,espressif-esp32-devkitc,espressif-esp32-c6-devkitc-1,espressif-esp32-s3-devkitc-1,bbc-microbit-v2,native,nrf52840dk,nrf5340dk,rpi-pico,rpi-pico-w,st-nucleo-c031c6,st-nucleo-h755zi-q,st-nucleo-wb55" >> "$GITHUB_ENV"
+              ;;
+            'ci-build:stm32')
+              echo "LAZE_BUILDERS=st-b-l475e-iot01a,st-steval-mkboxpro,st-nucleo-c031c6,st-nucleo-f042k6,st-nucleo-f401re,st-nucleo-f411re,st-nucleo-f767zi,st-nucleo-h755zi-q,st-nucleo-wb55,st-nucleo-wba55,stm32u083c-dk" >> "$GITHUB_ENV"
+              ;;
+            *)
+              # Can happen if `check-labels` finds no labels but still completes
+              # successfully because of a bug.
+              exit 1
+              ;;
+          esac
 
       - id: get_toolchain
         if: steps.should-skip.outputs.result != 'true'
@@ -150,7 +198,7 @@ jobs:
           components: rust-src, rustfmt
 
       - name: Install Rust for Xtensa
-        if: steps.should-skip.outputs.result != 'true'
+        if: steps.should-skip.outputs.result != 'true' && (env.LAZE_BUILDERS == null || contains(env.LAZE_BUILDERS, 'esp32-s3'))
         # No tag yet after https://github.com/esp-rs/xtensa-toolchain/pull/38 (will probably be @v1.5.5)
         uses: esp-rs/xtensa-toolchain@main
         with:
@@ -194,26 +242,9 @@ jobs:
           sha256sum /usr/lib/llvm-*/lib/clang/*/include/stdint.h
           true
 
-      - name: "limit build unless nightly build"
-        if: github.event_name != 'schedule' && steps.should-skip.outputs.result != 'true'
-        run: |
-          case '${{ needs.check-labels.outputs.label }}' in
-            'ci-build:full')
-              # Not setting `LAZE_BUILDERS` so that the build is not limited
-              ;;
-            'ci-build:rp')
-              echo "LAZE_BUILDERS=rpi-pico,rpi-pico2,rpi-pico2-w,rpi-pico-w" >> "$GITHUB_ENV"
-              ;;
-            'ci-build:small')
-              echo "LAZE_BUILDERS=ai-c3,espressif-esp32-devkitc,espressif-esp32-c6-devkitc-1,espressif-esp32-s3-devkitc-1,bbc-microbit-v2,native,nrf52840dk,nrf5340dk,rpi-pico,rpi-pico-w,st-nucleo-c031c6,st-nucleo-h755zi-q,st-nucleo-wb55" >> "$GITHUB_ENV"
-              ;;
-          esac
-
       - name: "ariel-os compilation test (default toolchain)"
         if: steps.should-skip.outputs.result != 'true'
         run: |
-          sccache --start-server || true # work around https://github.com/ninja-build/ninja/issues/2052
-
           echo "LAZE_BUILDERS=${LAZE_BUILDERS}"
           CONFIG_WIFI_NETWORK='test' CONFIG_WIFI_PASSWORD='password' laze build -DCARGO_ARGS+='--locked' --global --partition hash:${{ matrix.partition }}
 
@@ -228,8 +259,6 @@ jobs:
       - name: "ariel-os compilation test (nightly toolchain)"
         if: github.event_name == 'schedule' && steps.should-skip.outputs.result != 'true'
         run: |
-          sccache --start-server || true # work around https://github.com/ninja-build/ninja/issues/2052
-
           CONFIG_WIFI_NETWORK='test' CONFIG_WIFI_PASSWORD='password' laze build -DCARGO_ARGS+='--locked' --global --partition hash:${{ matrix.partition }} --select nightly --disable xtensa
 
   build-success:
