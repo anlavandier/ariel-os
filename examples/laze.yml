@@ -12,6 +12,7 @@ subdirs:
   - blinky
   - coap-client
   - coap-server
+  - component-udp
   - device-metadata
   - gpio
   - hello-world
