@@ -1,5 +1,4 @@
-# Bindings Comparison
-
+# WASM-UDP interaction
 
 
 ## How to run
