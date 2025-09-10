@@ -5,6 +5,7 @@ apps:
       - bbc-microbit-v1
       - bbc-microbit-v2
       - esp
+      - heltec-wifi-lora-32-v3
       - nordic-thingy-91-x-nrf9151
       - nrf52840dk
       - nrf5340dk
@@ -12,6 +13,7 @@ apps:
       - nrf52dk
       - particle-xenon
       - rp
+      - seeedstudio-lora-e5-mini
       - st-b-l475e-iot01a
       - st-nucleo-c031c6
       - st-nucleo-f042k6

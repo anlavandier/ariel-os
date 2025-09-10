@@ -551,7 +551,7 @@ contexts:
     selects:
       - cortex-m0-plus
     disables:
-      # TODO: not enough RAM
+      # TODO: not enough RAM for HTTP examples
       - network
     provides:
       - has_hwrng
@@ -596,6 +596,18 @@ contexts:
       - has_hwrng
     env:
       PROBE_RS_CHIP: STM32WBA55CG
+      RUSTFLAGS:
+        - --cfg capability=\"hw/stm32-rng\"
+
+  - name: stm32wle5jc
+    parent: stm32
+    selects:
+      - cortex-m4
+    provides:
+      - has_hwrng
+      - has_storage_support
+    env:
+      PROBE_RS_CHIP: STM32WLE5JC
       RUSTFLAGS:
         - --cfg capability=\"hw/stm32-rng\"
 
@@ -1767,6 +1779,9 @@ builders:
     provides:
       - has_usb_device_port
 
+  - name: heltec-wifi-lora-32-v3
+    parent: esp32s3
+
   - name: nrf5340dk
     parent: nrf5340
     provides:
@@ -1867,7 +1882,7 @@ builders:
     env:
       CARGO_ENV:
         # This ISR is unused on a naked board. Configured here for testing.
-        - CONFIG_SWI=LPUART1
+        - CONFIG_SWI=USART2
 
   - name: st-steval-mkboxpro
     parent: stm32u585ai
@@ -1890,6 +1905,15 @@ builders:
       CARGO_ENV:
         # This ISR is unused on a naked board. Configured here for testing.
         - CONFIG_SWI=USART2_LPUART2
+
+  - name: seeedstudio-lora-e5-mini
+    parent: stm32wle5jc
+    provides:
+      - has_swi
+    env:
+      CARGO_ENV:
+        # This ISR is unused on a naked board. Configured here for testing.
+        - CONFIG_SWI=USART2
 
   - name: native
     parent: ariel-os

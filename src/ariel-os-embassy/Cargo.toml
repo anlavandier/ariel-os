@@ -149,8 +149,9 @@ defmt = [
   "embassy-usb?/defmt",
   "ariel-os-hal/defmt",
   "ariel-os-embassy-common/defmt",
+  "trouble-host?/defmt",
   "usbd-hid?/defmt",
 ]
 log = ["ariel-os-hal/log"]
 
-_test = ["executor-none", "i2c", "spi", "external-interrupts"]
+_test = ["executor-none", "i2c", "spi", "time", "external-interrupts"]

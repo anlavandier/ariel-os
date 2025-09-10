@@ -44,7 +44,7 @@ members = [
 exclude = ["src/lib", "doc"]
 
 default-members = ["examples/hello-world"]
-resolver = "2"
+resolver = "3"
 
 [workspace.package]
 license = "MIT OR Apache-2.0"
@@ -100,7 +100,7 @@ esp-println = { version = "0.13.0", default-features = false }
 esp-wifi = { version = "0.12.0", default-features = false }
 esp-wifi-sys = { version = "0.7.1", default-features = false }
 
-esp-storage = { version = "0.4.0" }
+esp-storage = { version = "0.7.0" }
 xtensa-lx-rt = { version = "0.18.0", default-features = false }
 
 linkme = { version = "0.3.32" }
@@ -133,12 +133,11 @@ ariel-os-threads = { path = "src/ariel-os-threads" }
 ariel-os-utils = { path = "src/ariel-os-utils", default-features = false }
 
 const_panic = { version = "0.2.8", default-features = false }
-const-str = "0.6.0"
+const-str = "0.7.0"
 defmt = { version = "1.0.0" }
 document-features = "0.2.8"
 fugit = { version = "0.3.7", default-features = false }
 heapless = { version = "0.8.0", default-features = false }
-konst = { version = "0.3.8", default-features = false }
 ld-memory = { version = "0.2.9" }
 log = { version = "0.4.20", default-features = false }
 once_cell = { version = "=1.19.0", default-features = false, features = [
@@ -173,6 +172,7 @@ unexpected_cfgs = "allow"
 
 [workspace.lints.clippy]
 # Clippy lints are documented here: https://rust-lang.github.io/rust-clippy/master/index.html
+collapsible_if = "allow" # We can remove this when we bump the MSRV to 1.89 or higher.
 indexing_slicing = "deny"
 missing_safety_doc = { level = "warn" }
 pedantic = { level = "warn", priority = -1 }

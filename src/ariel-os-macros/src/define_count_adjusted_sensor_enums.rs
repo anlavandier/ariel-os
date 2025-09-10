@@ -70,8 +70,10 @@ pub fn define_count_adjusted_sensor_enums(_item: TokenStream) -> TokenStream {
         /// This type is automatically generated, the number of variants is automatically adjusted.
         #[derive(Debug, Copy, Clone)]
         pub enum Samples {
-            #[doc(hidden)]
-            #(#samples_variants),*
+            #(
+                #[doc(hidden)]
+                #samples_variants
+            ),*
         }
 
         impl Reading for Samples {
@@ -81,7 +83,7 @@ pub fn define_count_adjusted_sensor_enums(_item: TokenStream) -> TokenStream {
                 }
             }
 
-            fn samples(&self) -> impl ExactSizeIterator<Item = Sample> {
+            fn samples(&self) -> impl ExactSizeIterator<Item = Sample> + core::iter::FusedIterator {
                 match self {
                     #(#samples_iter),*
                 }
@@ -95,8 +97,10 @@ pub fn define_count_adjusted_sensor_enums(_item: TokenStream) -> TokenStream {
         /// This type is automatically generated, the number of variants is automatically adjusted.
         #[derive(Debug, Copy, Clone)]
         pub enum ReadingChannels {
-            #[doc(hidden)]
-            #(#reading_channels_variants),*,
+            #(
+                #[doc(hidden)]
+                #reading_channels_variants
+            ),*,
         }
 
         impl ReadingChannels {
@@ -106,7 +110,7 @@ pub fn define_count_adjusted_sensor_enums(_item: TokenStream) -> TokenStream {
             /// [`Samples`].
             /// [`Iterator::zip()`] can be useful to zip the returned iterator with the one
             /// obtained with [`Reading::samples()`].
-            pub fn iter(&self) -> impl Iterator<Item = ReadingChannel> + '_ {
+            pub fn iter(&self) -> impl ExactSizeIterator<Item = ReadingChannel> + core::iter::FusedIterator + '_ {
                 match self {
                     #(#samples_iter),*,
                 }
