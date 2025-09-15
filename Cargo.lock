@@ -6361,6 +6361,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "wasm-coap-interop"
+version = "0.0.0"
+dependencies = [
+ "ariel-os",
+ "ariel-os-boards",
+ "coap-handler-implementations",
+ "coap-request",
+ "coap-request-implementations",
+ "embassy-futures",
+ "embedded-nal-coap",
+ "wasmtime 36.0.2",
+]
+
+[[package]]
 name = "wasm-encoder"
 version = "0.235.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
