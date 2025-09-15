@@ -1,7 +1,10 @@
 
 # cargo-vet audits file
 
-[audits]
+[[audits.log]]
+who = "chrysn <chrysn@fsfe.org>"
+criteria = "safe-to-deploy"
+delta = "0.4.27 -> 0.4.28"
 
 [[trusted.aho-corasick]]
 criteria = "safe-to-deploy"
