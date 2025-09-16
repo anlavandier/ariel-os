@@ -71,7 +71,9 @@ pub mod api {
 
         // NOTE: we may want to re-export more items in the future, but not re-export the whole
         // crate.
-        pub use embassy_time::{Delay, Duration, Instant, TICK_HZ, Timer};
+        pub use embassy_time::{
+            Delay, Duration, Instant, TICK_HZ, TimeoutError, Timer, with_timeout,
+        };
     }
 
     #[cfg(feature = "ble")]
@@ -277,7 +279,7 @@ async fn init_task(mut peripherals: hal::OptionalPeripherals) {
 
     #[cfg(feature = "usb-ethernet")]
     let device = {
-        use ariel_os_embassy_common::identity::DeviceId;
+        use ariel_os_embassy_common::identity::DeviceId as _;
         use embassy_usb::class::cdc_ncm::{
             CdcNcmClass, State as CdcNcmState, embassy_net::State as NetState,
         };

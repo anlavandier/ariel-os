@@ -30,7 +30,7 @@ jobs:
           toolchain: ${{ steps.get_toolchain.outputs.toolchain }}
 
       - name: Install laze
-        uses: taiki-e/install-action@0c5db7f7f897c03b771660e91d065338615679f4 # v2
+        uses: taiki-e/install-action@849bd009f730a24e9db18262f4e9f062591dee39 # v2
         with:
           tool: laze@0.1
 
@@ -58,7 +58,7 @@ jobs:
       # a correct use for it (specifically referring to the GUI concept), it is
       # totally fine to remove this lint.
       - name: Check for occurrences of the word fold_er (without the underscore)
-        run: set +e; grep -ri "fold""er" --line-number --exclude-dir=.git; test $? -eq 1
+        run: set +e; grep -ri "fold""er" --line-number --exclude-dir=.git --exclude-dir=supply-chain; test $? -eq 1
 
       # This should be replaced with a Clippy lint when one exists.
       - name: Check for leftover occurrences of the `authors` key in manifests
@@ -66,6 +66,13 @@ jobs:
 
       - name: Forbid version keys in manifests of tests and examples
         run: set +e; grep -r '^version\s*=\|^version\.workspace' --line-number examples tests; test $? -eq 1
+
+      # `find -exec` does not make it easy to fail with a non-zero code when the
+      # `exec`ed command fails.
+      - name: Check for missing `rust-version` keys in `ariel-os*` crates
+        run: |
+          find src -iwholename 'src/ariel-os*/Cargo.toml' -exec sh -c \
+            'grep -q --with-filename '^rust-version' "$0" || (echo "$0 is missing a rust-version key"; kill $PPID)' \{\} \;
 
       - id: get_toolchain
         run: echo "toolchain=$(scripts/rust-toolchain.sh)" >> $GITHUB_OUTPUT
@@ -82,7 +89,7 @@ jobs:
         uses: Swatinem/rust-cache@98c8021b550208e191a6a3145459bfc9fb29c4c0 # v2
 
       - name: Install cargo-deny
-        uses: taiki-e/install-action@0c5db7f7f897c03b771660e91d065338615679f4 # v2
+        uses: taiki-e/install-action@849bd009f730a24e9db18262f4e9f062591dee39 # v2
         with:
           tool: cargo-deny
 
@@ -369,7 +376,7 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
 
       - name: Install taplo
-        uses: taiki-e/install-action@0c5db7f7f897c03b771660e91d065338615679f4 # v2
+        uses: taiki-e/install-action@849bd009f730a24e9db18262f4e9f062591dee39 # v2
         with:
           tool: taplo
           fallback: none
@@ -385,7 +392,7 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
 
       - name: Install cargo-manifest-check
-        uses: taiki-e/install-action@0c5db7f7f897c03b771660e91d065338615679f4 # v2
+        uses: taiki-e/install-action@849bd009f730a24e9db18262f4e9f062591dee39 # v2
         with:
           tool: cargo-manifest-check@0.2
 
@@ -422,7 +429,7 @@ jobs:
           ./doc/gen_support_matrix_html.rs generate doc/support_matrix.yml /dev/null --tier 3
 
       - name: Install mdbook and mdbook utils
-        uses: taiki-e/install-action@0c5db7f7f897c03b771660e91d065338615679f4 # v2
+        uses: taiki-e/install-action@849bd009f730a24e9db18262f4e9f062591dee39 # v2
         with:
           tool: mdbook, mdbook-cmdrun
 
