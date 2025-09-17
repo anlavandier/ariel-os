@@ -1,0 +1,10 @@
+[package]
+name = "wasm-udp-interop"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+ariel-os = { path = "../../src/ariel-os", features = ["alloc", "time", "udp"] }
+ariel-os-boards = { path = "../../src/ariel-os-boards" }
+wasmtime = { version = "36.0", default-features = false, features = ["runtime", "pulley", "component-model"] }
+embassy-futures = { version = "0.1.1", default-features = false}

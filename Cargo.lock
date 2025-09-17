@@ -6389,6 +6389,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "wasm-udp-interop"
+version = "0.1.0"
+dependencies = [
+ "ariel-os",
+ "ariel-os-boards",
+ "embassy-futures",
+ "wasmtime 36.0.2",
+]
+
+[[package]]
 name = "wasmi"
 version = "0.47.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

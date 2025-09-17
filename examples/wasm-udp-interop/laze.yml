@@ -1,0 +1,10 @@
+apps:
+  - name: wasm-udp-interop
+    env:
+      global:
+        executor_stacksize_required:
+          - "16384"
+    selects:
+    - usb-ethernet
+    - network-config-static
+    - network

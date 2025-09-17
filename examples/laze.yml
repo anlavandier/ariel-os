@@ -36,6 +36,7 @@ subdirs:
   - usb-keyboard
   - usb-serial
   - wasm-coap-interop
+  - wasm-udp-interop
   - wasmi-example
   - wasmi-over-udp
   - wasmi-explore
