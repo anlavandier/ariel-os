@@ -4,6 +4,7 @@
 /// One single type must be defined so that it can be used in the Future returned by sensor
 /// drivers, which must be the same for every sensor driver so it can be part of the `Sensor`
 /// trait.
+#[expect(clippy::too_many_lines)]
 #[proc_macro]
 pub fn define_count_adjusted_sensor_enums(_item: TokenStream) -> TokenStream {
     use quote::quote;
@@ -11,37 +12,27 @@ pub fn define_count_adjusted_sensor_enums(_item: TokenStream) -> TokenStream {
     #[allow(clippy::wildcard_imports)]
     use define_count_adjusted_enum::*;
 
-    // The order of these feature-gated statements is important as these features are not meant to
-    // be mutually exclusive.
-    #[allow(unused_variables, reason = "overridden by feature selection")]
-    let count = 1;
-    #[cfg(feature = "max-sample-min-count-2")]
-    let count = 2;
-    #[cfg(feature = "max-sample-min-count-3")]
-    let count = 3;
-    #[cfg(feature = "max-sample-min-count-4")]
-    let count = 4;
-    #[cfg(feature = "max-sample-min-count-5")]
-    let count = 5;
-    #[cfg(feature = "max-sample-min-count-6")]
-    let count = 6;
-    #[cfg(feature = "max-sample-min-count-7")]
-    let count = 7;
-    #[cfg(feature = "max-sample-min-count-8")]
-    let count = 8;
-    #[cfg(feature = "max-sample-min-count-9")]
-    let count = 9;
-    #[cfg(feature = "max-sample-min-count-12")]
-    let count = 12;
+    let count = get_allocation_size();
 
     let samples_variants = (1..=count).map(|i| {
         let variant = variant_name(i);
         quote! { #variant([Sample; #i]) }
     });
+    let samples_from_impls = (1..=count)
+        .map(|i| {
+            let variant = variant_name(i);
+            quote! {
+                impl From<[Sample; #i]> for Samples {
+                    fn from(value: [Sample; #i]) -> Self {
+                        Self { samples: InnerSamples::#variant(value) }
+                    }
+                }
+            }
+        });
     let samples_first_sample = (1..=count).map(|i| {
         let variant = variant_name(i);
         quote! {
-            Self::#variant(samples) => {
+            InnerSamples::#variant(samples) => {
                 if let Some(sample) = samples.first() {
                     *sample
                 } else {
@@ -52,6 +43,17 @@ pub fn define_count_adjusted_sensor_enums(_item: TokenStream) -> TokenStream {
         }
     });
 
+    let reading_channels_from_impls = (1..=count)
+        .map(|i| {
+            let variant = variant_name(i);
+            quote! {
+                impl From<[ReadingChannel; #i]> for ReadingChannels {
+                    fn from(value: [ReadingChannel; #i]) -> Self {
+                        Self { channels: InnerReadingChannels::#variant(value) }
+                    }
+                }
+            }
+        });
     let reading_channels_variants = (1..=count).map(|i| {
         let variant = variant_name(i);
         quote! { #variant([ReadingChannel; #i]) }
@@ -60,9 +62,13 @@ pub fn define_count_adjusted_sensor_enums(_item: TokenStream) -> TokenStream {
     let samples_iter = (1..=count)
         .map(|i| {
             let variant = variant_name(i);
-            quote! { Self::#variant(samples) => samples.iter().copied() }
-        })
-        .collect::<Vec<_>>();
+            quote! { InnerSamples::#variant(ref samples) => samples.iter().copied() }
+        });
+    let reading_channels_iter = (1..=count)
+        .map(|i| {
+            let variant = variant_name(i);
+            quote! { InnerReadingChannels::#variant(ref channels) => channels.iter().copied() }
+        });
 
     let expanded = quote! {
         /// Samples returned by a sensor driver.
@@ -71,41 +77,46 @@ pub fn define_count_adjusted_sensor_enums(_item: TokenStream) -> TokenStream {
         ///
         /// # Note
         ///
-        /// This type is automatically generated, the number of variants is automatically adjusted.
+        /// This type is automatically generated, the number of [`Sample`]s that can be stored is
+        /// automatically adjusted.
         #[derive(Debug, Copy, Clone)]
-        pub enum Samples {
-            #(
-                #[doc(hidden)]
-                #samples_variants
-            ),*
+        pub struct Samples {
+            samples: InnerSamples,
         }
+
+        #(#samples_from_impls)*
 
         impl Reading for Samples {
             fn sample(&self) -> Sample {
-                match self {
+                match self.samples {
                     #(#samples_first_sample),*
                 }
             }
 
             fn samples(&self) -> impl ExactSizeIterator<Item = Sample> + core::iter::FusedIterator {
-                match self {
+                match self.samples {
                     #(#samples_iter),*
                 }
             }
+        }
+
+        #[derive(Debug, Copy, Clone)]
+        enum InnerSamples {
+            #(#samples_variants),*
         }
 
         /// Metadata required to interpret samples returned by [`Sensor::wait_for_reading()`].
         ///
         /// # Note
         ///
-        /// This type is automatically generated, the number of variants is automatically adjusted.
+        /// This type is automatically generated, the number of [`ReadingChannel`]s that can be
+        /// stored is automatically adjusted.
         #[derive(Debug, Copy, Clone)]
-        pub enum ReadingChannels {
-            #(
-                #[doc(hidden)]
-                #reading_channels_variants
-            ),*,
+        pub struct ReadingChannels {
+            channels: InnerReadingChannels,
         }
+
+        #(#reading_channels_from_impls)*
 
         impl ReadingChannels {
             /// Returns an iterator over the underlying [`ReadingChannel`] items.
@@ -115,8 +126,8 @@ pub fn define_count_adjusted_sensor_enums(_item: TokenStream) -> TokenStream {
             /// [`Iterator::zip()`] can be useful to zip the returned iterator with the one
             /// obtained with [`Reading::samples()`].
             pub fn iter(&self) -> impl ExactSizeIterator<Item = ReadingChannel> + core::iter::FusedIterator + '_ {
-                match self {
-                    #(#samples_iter),*,
+                match self.channels {
+                    #(#reading_channels_iter),*
                 }
             }
 
@@ -130,6 +141,11 @@ pub fn define_count_adjusted_sensor_enums(_item: TokenStream) -> TokenStream {
                 }
             }
         }
+
+        #[derive(Debug, Copy, Clone)]
+        enum InnerReadingChannels {
+            #(#reading_channels_variants),*
+        }
     };
 
     TokenStream::from(expanded)
@@ -138,5 +154,32 @@ pub fn define_count_adjusted_sensor_enums(_item: TokenStream) -> TokenStream {
 mod define_count_adjusted_enum {
     pub fn variant_name(index: usize) -> syn::Ident {
         quote::format_ident!("V{index}")
+    }
+
+    pub fn get_allocation_size() -> usize {
+        // The order of these feature-gated statements is important as these features are not meant to
+        // be mutually exclusive.
+        #[allow(unused_variables, reason = "overridden by feature selection")]
+        let count = 1;
+        #[cfg(feature = "max-sample-min-count-2")]
+        let count = 2;
+        #[cfg(feature = "max-sample-min-count-3")]
+        let count = 3;
+        #[cfg(feature = "max-sample-min-count-4")]
+        let count = 4;
+        #[cfg(feature = "max-sample-min-count-5")]
+        let count = 5;
+        #[cfg(feature = "max-sample-min-count-6")]
+        let count = 6;
+        #[cfg(feature = "max-sample-min-count-7")]
+        let count = 7;
+        #[cfg(feature = "max-sample-min-count-8")]
+        let count = 8;
+        #[cfg(feature = "max-sample-min-count-9")]
+        let count = 9;
+        #[cfg(feature = "max-sample-min-count-12")]
+        let count = 12;
+
+        count
     }
 }

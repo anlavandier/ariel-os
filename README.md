@@ -11,6 +11,7 @@ Ariel OS is an operating system for secure, memory-safe, low-power Internet of T
 It is based on Rust from the ground up
 and [supports hardware](https://ariel-os.github.io/ariel-os/dev/docs/book/hardware-functionality-support.html)
 based on 32-bit microcontroller architectures (Cortex-M, RISC-V, and Xtensa).
+For a quick overview of our motivations and what we plan next, check our [roadmap](https://github.com/ariel-os/ariel-os/blob/main/ROADMAP.md).
 
 ## Goals and Design
 
@@ -28,6 +29,23 @@ Check out our [FAQ](https://github.com/ariel-os/ariel-os/blob/main/FAQ.md) and/o
 See the [Getting Started page][getting-started-mdbook] in the User Guide to get the [`hello-world` example][hello-world-example] running in less than 5 minutes.
 
 ![Terminal screencast of compiling and flashing the hello-world example](./book/src/hello-world_render.svg)
+
+## Documentation
+
+Multiple resources are available to learn Ariel OS:
+
+- 📔 Extensive documentation for Ariel OS can be found in the
+  [book](https://ariel-os.github.io/ariel-os/dev/docs/book/).
+- 🛠️ Reference documentation for Ariel OS can be found in the
+  [API documentation](https://ariel-os.github.io/ariel-os/dev/docs/api/ariel_os/).
+- ⚙️  The git repository is available on
+  [GitHub](https://github.com/ariel-os/ariel-os).
+- ✨ [Examples](https://github.com/ariel-os/ariel-os/tree/main/examples)
+  demonstrate various features of Ariel OS.
+- 🧪 A set of [test cases](https://github.com/ariel-os/ariel-os/tree/main/tests)
+  further verifies the capabilities of Ariel OS.
+- 🚧 The [roadmap](https://github.com/ariel-os/ariel-os/issues/242)
+  shows the planned features for Ariel OS.
 
 ## Minimum Supported Rust Version (MSRV) and Policy
 

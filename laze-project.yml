@@ -550,9 +550,7 @@ contexts:
     parent: stm32
     selects:
       - cortex-m0-plus
-    disables:
-      # TODO: not enough RAM for HTTP examples
-      - network
+      - ram-small
     provides:
       - has_hwrng
       - has_storage_support
@@ -857,6 +855,9 @@ modules:
         isr_stacksize_required_default: "512"
         executor_stacksize_required_default: "512"
 
+  - name: ram-small
+    help: This module marks MCUs with little RAM (currently, the ones which cannot run HTTP or CoAP)
+
   - name: stable
     help: build with stable Rust
     provides_unique:
@@ -1027,6 +1028,12 @@ modules:
           - probe-rs download --chip ${PROBE_RS_CHIP} ${out} $@
           - probe-rs reset --chip ${PROBE_RS_CHIP}
 
+      attach:
+        help: Attach probe-rs to rtt logging
+        build: false
+        cmd:
+          - probe-rs attach --chip ${PROBE_RS_CHIP} ${out} $@
+
       debug:
         help: Starts a probe-rs gdb server
         cmd:
@@ -1068,28 +1075,42 @@ modules:
   - name: network
     selects:
       - network_device
-      - network-config-default
+      - network-config-ipv4-default
 
-  - name: network-config-default
+  - name: network-config-ipv4-default
     help: use default network configuration method
     selects:
-      - ?network-config-dhcp
-      - ?network-config-static
-      - network-config
+      - ?network-config-ipv4-dhcp
+      - ?network-config-ipv4-static
+      - network-config-ipv4
 
   - name: network-config-dhcp
+    help: "deprecated: use `network-config-ipv4-dhcp` instead"
+    selects:
+      - network-config-ipv4-dhcp
+
+  - name: network-config-ipv4-dhcp
     help: use DHCPv4 for network configuration
     selects:
       - network
+      # Needed for aliasing.
+      - network-config-dhcp
     provides_unique:
-      - network-config
+      - network-config-ipv4
 
   - name: network-config-static
-    help: use static IP network configuration
+    help: "deprecated: use `network-config-ipv4-static` instead"
+    selects:
+      - network-config-ipv4-static
+
+  - name: network-config-ipv4-static
+    help: use static IPv4 network configuration
     selects:
       - network
+      # Needed for aliasing.
+      - network-config-static
     provides_unique:
-      - network-config
+      - network-config-ipv4
     env:
       global:
         FEATURES:
@@ -1290,6 +1311,8 @@ modules:
       # unless provided by the context.
       - c-function-assert
       - c-function-abort
+    conflicts:
+      - ram-small
     env:
       global:
         FEATURES:

@@ -30,7 +30,7 @@ jobs:
           toolchain: ${{ steps.get_toolchain.outputs.toolchain }}
 
       - name: Install laze
-        uses: taiki-e/install-action@849bd009f730a24e9db18262f4e9f062591dee39 # v2
+        uses: taiki-e/install-action@ea0eda622640ac23a17ba349cf09e2709d58f5e1 # v2
         with:
           tool: laze@0.1
 
@@ -72,7 +72,7 @@ jobs:
       - name: Check for missing `rust-version` keys in `ariel-os*` crates
         run: |
           find src -iwholename 'src/ariel-os*/Cargo.toml' -exec sh -c \
-            'grep -q --with-filename '^rust-version' "$0" || (echo "$0 is missing a rust-version key"; kill $PPID)' \{\} \;
+            'grep -q --with-filename 'rust-version' "$0" || (echo "$0 is missing a rust-version key"; kill $PPID)' \{\} \;
 
       - id: get_toolchain
         run: echo "toolchain=$(scripts/rust-toolchain.sh)" >> $GITHUB_OUTPUT
@@ -89,7 +89,7 @@ jobs:
         uses: Swatinem/rust-cache@98c8021b550208e191a6a3145459bfc9fb29c4c0 # v2
 
       - name: Install cargo-deny
-        uses: taiki-e/install-action@849bd009f730a24e9db18262f4e9f062591dee39 # v2
+        uses: taiki-e/install-action@ea0eda622640ac23a17ba349cf09e2709d58f5e1 # v2
         with:
           tool: cargo-deny
 
@@ -125,6 +125,7 @@ jobs:
                 hwrng,
                 i2c,
                 mdns,
+                multicast,
                 net,
                 no-boards,
                 sensors,
@@ -279,6 +280,7 @@ jobs:
                     hwrng,
                     i2c,
                     mdns,
+                    multicast,
                     net,
                     no-boards,
                     random,
@@ -376,7 +378,7 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
 
       - name: Install taplo
-        uses: taiki-e/install-action@849bd009f730a24e9db18262f4e9f062591dee39 # v2
+        uses: taiki-e/install-action@ea0eda622640ac23a17ba349cf09e2709d58f5e1 # v2
         with:
           tool: taplo
           fallback: none
@@ -392,7 +394,7 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
 
       - name: Install cargo-manifest-check
-        uses: taiki-e/install-action@849bd009f730a24e9db18262f4e9f062591dee39 # v2
+        uses: taiki-e/install-action@ea0eda622640ac23a17ba349cf09e2709d58f5e1 # v2
         with:
           tool: cargo-manifest-check@0.2
 
@@ -420,16 +422,28 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
 
       - name: typos
-        uses: crate-ci/typos@85f62a8a84f939ae994ab3763f01a0296d61a7ee # v1.36.2
+        uses: crate-ci/typos@0c17dabcee8b8f1957fa917d17393a23e02e1583 # v1.36.3
+
+      - name: Check that the book summary has an up-to-date board list
+        run: ./doc/gen_book.rs summary doc/support_matrix.yml book/src/SUMMARY.md --template-path book/src/SUMMARY.md.tmpl --check
+
+      - name: Check that the board pages are all up-to-date
+        run: ./doc/gen_book.rs board-pages doc/support_matrix.yml book/src/boards/ --check
 
       - name: Check the support matrix generation exit code
         run: |
-          ./doc/gen_support_matrix_html.rs generate doc/support_matrix.yml /dev/null --tier 1
-          ./doc/gen_support_matrix_html.rs generate doc/support_matrix.yml /dev/null --tier 2
-          ./doc/gen_support_matrix_html.rs generate doc/support_matrix.yml /dev/null --tier 3
+          ./doc/gen_book.rs matrix doc/support_matrix.yml /dev/null --tier 1
+          ./doc/gen_book.rs matrix doc/support_matrix.yml /dev/null --tier 2
+          ./doc/gen_book.rs matrix doc/support_matrix.yml /dev/null --tier 3
+
+      - name: Check the board list markdown generation exit code
+        run: |
+          ./doc/gen_book.rs board-list doc/support_matrix.yml /dev/null --tier 1
+          ./doc/gen_book.rs board-list doc/support_matrix.yml /dev/null --tier 2
+          ./doc/gen_book.rs board-list doc/support_matrix.yml /dev/null --tier 3
 
       - name: Install mdbook and mdbook utils
-        uses: taiki-e/install-action@849bd009f730a24e9db18262f4e9f062591dee39 # v2
+        uses: taiki-e/install-action@ea0eda622640ac23a17ba349cf09e2709d58f5e1 # v2
         with:
           tool: mdbook, mdbook-cmdrun
 
