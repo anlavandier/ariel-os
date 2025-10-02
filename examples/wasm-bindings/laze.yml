@@ -1,0 +1,8 @@
+apps:
+  - name: wasm-bindings
+    selects:
+      - network-config-static
+      - network
+      - usb-ethernet
+      # - sw/threading
+      - hwrng

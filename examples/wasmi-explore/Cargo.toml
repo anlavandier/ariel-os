@@ -10,7 +10,7 @@ workspace = true
 [dependencies]
 ariel-os = { path = "../../src/ariel-os", features = ["alloc", "time", "random"]}
 ariel-os-boards = { path = "../../src/ariel-os-boards" }
-ariel-os-bindings = { path = "../../src/ariel-os-bindings", features = ["log", "wasm-host"] }
+ariel-os-bindings = { path = "../../src/ariel-os-bindings", features = ["log"] }
 defmt = { workspace = true }
 
 serde = {version = "*", default-features = false, features = ["derive"]}

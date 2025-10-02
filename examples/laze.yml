@@ -6,7 +6,6 @@ defaults:
 subdirs:
   - alloc
   - benchmark
-  - bindings-comp
   - ble-advertiser
   - ble-scanner
   - blinky
@@ -35,6 +34,8 @@ subdirs:
   - udp-echo
   - usb-keyboard
   - usb-serial
+  - wasm-bindings
+  - wasm-bindings-async
   - wasm-coap-interop
   - wasm-udp-interop
   - wasmi-example

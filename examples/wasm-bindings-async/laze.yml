@@ -1,0 +1,4 @@
+apps:
+  - name: wasm-bindings-async
+    selects:
+      - hwrng

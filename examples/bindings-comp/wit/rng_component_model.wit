@@ -1,6 +1,0 @@
-package test:example;
-
-world example-world {
-    import ariel:bindings/rng-api;
-    export start: func() -> u64;
-}

@@ -1,0 +1,15 @@
+package ariel:wasm-bindings@0.0.1;
+
+interface udp {
+    resource udp-socket {
+        bind: static func(port: u16) -> result;
+        send: static func(data: list<u8>) -> result;
+        try-recv: static func() -> option<list<u8>>;
+    }
+}
+
+world example-udp-interop {
+    use udp.{udp-socket};
+    export try-recv-then-send-back: func();
+    export bind-socket: func();
+}

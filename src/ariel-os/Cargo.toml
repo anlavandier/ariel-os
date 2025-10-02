@@ -204,7 +204,7 @@ executor-thread = ["ariel-os-embassy/executor-thread", "threading"]
 executor-none = ["ariel-os-embassy/executor-none"]
 
 # Enable the wasm bindings
-wasm-bindings = ["ariel-os-bindings/wasm-host"]
+wasm-bindings = ["ariel-os-bindings"]
 
 # features needed for `cargo test`
 _test = ["i2c", "no-boards", "spi", "external-interrupts", "ariel-os-rt/_test"]

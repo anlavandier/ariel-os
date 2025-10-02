@@ -1,10 +1,12 @@
-package ariel:bindings;
-
+package ariel:wasm-bindings@0.0.1;
 interface rng-api {
-    next-u32: func() -> u32;
-    next-u64: func() -> u64;
-    random-bytes: func(len: u32) -> list<u8>;
+    resource r-n-g {
+    next-u32: static func() -> u32;
+    next-u64: static func() -> u64;
+    random-bytes: static func(len: u32) -> list<u8>;
+    }
 }
+
 
 world rng {
     import rng-api;
