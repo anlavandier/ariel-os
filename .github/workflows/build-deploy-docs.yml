@@ -136,15 +136,10 @@ jobs:
           mv target/riscv32imac-unknown-none-elf/doc/ariel_os_esp/ ./_site/dev/docs/api
           mv target/doc/* ./_site/dev/docs/api
 
-      - name: Install mdbook and mdbook utils
-        uses: taiki-e/install-action@ea0eda622640ac23a17ba349cf09e2709d58f5e1 # v2
+      - name: Install mdbook
+        uses: taiki-e/install-action@7fe7b8c79a3c5569643cf27dfc32456883a4cd4d # v2
         with:
-          tool: mdbook, mdbook-cmdrun
-
-      - name: Check for unexpected cmdrun uses
-        run: |
-          cd book
-          ./cmdrun-check.sh
+          tool: mdbook@0.5.0-alpha.1
 
       - name: Build the book
         run: |

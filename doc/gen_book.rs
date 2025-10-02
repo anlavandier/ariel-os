@@ -23,130 +23,6 @@ use miette::Diagnostic;
 use minijinja::{context, Environment};
 use serde::Serialize;
 
-const LIST_TEMPLATE: &str = r#"
-<ul>
-{%- for name, board in boards %}
-  <li><a href=./{{ name }}.html>{{ board.name }}</a></li>
-{%- endfor %}
-</ul>
-"#;
-
-const BOARD_PAGE_TEMPLATE: &str = r#"# {{ board_info.name }}
-
-## Board Info
-
-- **Tier:** {{ board_info.tier }}
-- **Ariel OS Name:** `{{ board_info.technical_name }}`
-- **Chip:** {{ board_info.chip }}
-- **Chip Ariel OS Name:** `{{ board_info.chip_technical_name }}`
-
-### References
-
-- [Manufacturer link]({{ board_info.url }})
-
-## Support Matrix
-
-<table>
-  <thead>
-    <tr>
-      <th>Functionality</th>
-      <th>Support Status</th>
-    </tr>
-  </thead>
-  <tbody>
-    {%- for functionality in board_info.functionalities %}
-    <tr>
-      <td>{{ functionality.title }}</td>
-      <td class="support-cell" title="{{ functionality.description }}">{{ functionality.icon }}</td>
-    </tr>
-    {%- endfor %}
-  </tbody>
-</table>
-
-<style>
-.support-cell {
-  text-align: center;
-}
-</style>
-
-Legend:
-
-<dl>
-  {%- for support_key in support_keys %}
-  <div>
-    <dt>{{ support_key.icon }}</dt><dd>{{ support_key.description }}</dd>
-  </div>
-  {%- endfor %}
-</dl>
-<style>
-dt, dd {
-  display: inline;
-}
-</style>
-"#;
-
-const TABLE_TEMPLATE: &str = r##"<!-- This table is auto-generated. Do not edit manually. -->
-<table class="support-matrix">
-  <thead>
-    <tr>
-      <th colspan="2">Chip</th>
-      <th colspan="2">Testing Board</th>
-      <th colspan="{{ matrix.functionalities|length }}">Functionality</th>
-    </tr>
-    <tr>
-      <th>Manufacturer Name</th>
-      <th>Ariel OS Name</th>
-      <th>Manufacturer Name</th>
-      <th>Ariel OS Name</th>
-      {%- for functionality in matrix.functionalities %}
-      <th>{{ functionality.title }}</th>
-      {%- endfor %}
-    </tr>
-  </thead>
-  <tbody>
-    {%- for board in boards %}
-    <tr>
-      <td>{{ board.chip }}</td>
-      <td><code>{{ board.chip_technical_name }}</code></td>
-      <td><a href="{{ board.url }}">{{ board.name }}</a></td>
-      <td><code>{{ board.technical_name }}</code></td>
-      {%- for functionality in board.functionalities %}
-      <td class="support-cell" title="{{ functionality.description }}">{{ functionality.icon }}</td>
-      {%- endfor %}
-    </tr>
-    {%- endfor %}
-  </tbody>
-</table>
-<style>
-@media (min-width: 1920px) {
-  .support-matrix {
-    position: relative;
-    left: 50%;
-    transform: translate(-50%, 0);
-  }
-}
-.support-cell {
-  text-align: center;
-}
-</style>
-"##;
-
-const KEY_TEMPLATE: &str = r##"<p>Key:</p>
-
-<dl>
-  {%- for support_key in matrix.support_keys %}
-  <div>
-    <dt>{{ support_key.icon }}</dt><dd>{{ support_key.description }}</dd>
-  </div>
-  {%- endfor %}
-</dl>
-<style>
-dt, dd {
-  display: inline;
-}
-</style>
-"##;
-
 #[derive(argh::FromArgs)]
 /// utility commands to generate parts of the Ariel OS book
 struct Args {
@@ -191,9 +67,15 @@ impl SubCommand {
 #[argh(subcommand, name = "matrix")]
 /// generate the HTML support matrix
 struct SubCommandMatrix {
+    /// just check if the support matrix is up to date
+    #[argh(switch)]
+    check: bool,
     /// board tier (1, 2, or 3)
     #[argh(option)]
     tier: schema::Tier,
+    #[argh(option)]
+    /// path of the support matrix html template
+    template_path: PathBuf,
     #[argh(positional)]
     /// path of the input YAML file
     input_path: PathBuf,
@@ -204,6 +86,13 @@ struct SubCommandMatrix {
 
 impl SubCommandMatrix {
     fn run(self, matrix: &schema::Matrix) -> miette::Result<()> {
+        let matrix_template = fs::read_to_string(&self.template_path).map_err(|source| {
+            Error::SummaryTemplateFile {
+                path: self.template_path.clone(),
+                source,
+            }
+        })?;
+
         let mut board_info = gen_functionalities(&matrix)?;
 
         // TODO: read the order from the YAML file instead?
@@ -215,71 +104,122 @@ impl SubCommandMatrix {
             .collect::<Vec<_>>();
 
         let mut env = Environment::new();
-        env.add_template("matrix", TABLE_TEMPLATE).unwrap();
-        env.add_template("matrix_key", KEY_TEMPLATE).unwrap();
-
+        env.add_template("matrix", &matrix_template).unwrap();
         let tmpl = env.get_template("matrix").unwrap();
         let matrix_html = tmpl
             .render(context!(matrix => matrix, boards => boards))
             .unwrap();
 
-        let tmpl = env.get_template("matrix_key").unwrap();
-        let key_html = tmpl
-            .render(context!(matrix => matrix, boards => boards))
-            .unwrap();
+        if self.check {
+            let existing_matrix_html = fs::read_to_string(&self.output_path).map_err(|source| {
+                Error::ReadingExistingFile {
+                    path: self.output_path.clone(),
+                    source,
+                }
+            })?;
 
-        fs::write(&self.output_path, format!("{matrix_html}{key_html}\n")).map_err(|source| {
-            Error::WritingOutputFile {
-                path: self.output_path.clone(),
-                source,
+            if existing_matrix_html != matrix_html {
+                return Err(Error::ExistingHtmlNotUpToDate {
+                    path: self.output_path.clone(),
+                }
+                .into());
             }
-        })?;
+        } else {
+            fs::write(&self.output_path, matrix_html).map_err(|source| {
+                Error::WritingOutputFile {
+                    path: self.output_path.clone(),
+                    source,
+                }
+            })?;
+        }
 
         Ok(())
     }
 }
 
 #[derive(argh::FromArgs)]
-#[argh(subcommand, name = "board-list")]
-/// generate the list of supported boards, grouped by tier
+#[argh(subcommand, name = "board-index")]
+/// generate the board index page, featuring a list of supported board grouped by tier
 struct SubCommandList {
-    /// board tier (1, 2, or 3)
+    /// just check if the board index page is up to date
+    #[argh(switch)]
+    check: bool,
     #[argh(option)]
-    tier: schema::Tier,
+    /// path of the board index template
+    template_path: PathBuf,
     #[argh(positional)]
     /// path of the input YAML file
     input_path: PathBuf,
     #[argh(positional)]
-    /// path of the HTML file to generate
+    /// path of the Markdown file to generate (should be in book/src/boards/index.md)
     output_path: PathBuf,
 }
 
 impl SubCommandList {
     fn run(self, matrix: &schema::Matrix) -> miette::Result<()> {
-        let mut boards = matrix
-            .boards
-            .iter()
-            .filter(|(_, info)| info.tier == self.tier.to_string())
-            .collect::<Vec<_>>();
-
-        // TODO: read the order from the YAML file instead?
-        boards.sort_unstable_by_key(|b| b.1.name.to_lowercase());
-
-        let mut env = Environment::new();
-        env.add_template("board_list", LIST_TEMPLATE).unwrap();
-        let tmpl = env.get_template("board_list").unwrap();
-        let board_list_html = tmpl
-            .render(context!(
-                boards => boards
-            ))
-            .unwrap();
-
-        fs::write(&self.output_path, board_list_html).map_err(|source| {
-            Error::WritingOutputFile {
-                path: self.output_path.clone(),
+        let board_index_template = fs::read_to_string(&self.template_path).map_err(|source| {
+            Error::SummaryTemplateFile {
+                path: self.template_path.clone(),
                 source,
             }
         })?;
+
+        let mut tier1_boards = matrix
+            .boards
+            .iter()
+            .filter(|(_, info)| info.tier == schema::Tier::Tier1.to_string())
+            .collect::<Vec<_>>();
+        tier1_boards.sort_unstable_by_key(|b| b.1.name.to_lowercase());
+
+        let mut tier2_boards = matrix
+            .boards
+            .iter()
+            .filter(|(_, info)| info.tier == schema::Tier::Tier2.to_string())
+            .collect::<Vec<_>>();
+        tier2_boards.sort_unstable_by_key(|b| b.1.name.to_lowercase());
+
+        let mut tier3_boards = matrix
+            .boards
+            .iter()
+            .filter(|(_, info)| info.tier == schema::Tier::Tier3.to_string())
+            .collect::<Vec<_>>();
+        tier3_boards.sort_unstable_by_key(|b| b.1.name.to_lowercase());
+
+        let mut env = Environment::new();
+        env.add_template("board_list", &board_index_template)
+            .unwrap();
+        let tmpl = env.get_template("board_list").unwrap();
+        let board_index_md = tmpl
+            .render(context!(
+                tier1_boards => tier1_boards,
+                tier2_boards => tier2_boards,
+                tier3_boards => tier3_boards
+            ))
+            .unwrap();
+
+        if self.check {
+            let existing_board_index_md =
+                fs::read_to_string(&self.output_path).map_err(|source| {
+                    Error::ReadingExistingFile {
+                        path: self.output_path.clone(),
+                        source,
+                    }
+                })?;
+
+            if existing_board_index_md != board_index_md {
+                return Err(Error::ExistingMarkdownNotUpToDate {
+                    path: self.output_path.clone(),
+                }
+                .into());
+            }
+        } else {
+            fs::write(&self.output_path, board_index_md).map_err(|source| {
+                Error::WritingOutputFile {
+                    path: self.output_path.clone(),
+                    source,
+                }
+            })?;
+        }
 
         Ok(())
     }
@@ -335,7 +275,7 @@ impl SubCommandSummary {
             })?;
 
             if existing_summary_md != summary_md {
-                return Err(Error::ExistingHtmlNotUpToDate {
+                return Err(Error::ExistingMarkdownNotUpToDate {
                     path: self.output_path.clone(),
                 }
                 .into());
@@ -360,6 +300,9 @@ struct SubCommandPages {
     /// just check if the board pages are up to date
     #[argh(switch)]
     check: bool,
+    #[argh(option)]
+    /// path of the template summary
+    template_path: PathBuf,
     #[argh(positional)]
     /// path of the input YAML file
     input_path: PathBuf,
@@ -370,11 +313,19 @@ struct SubCommandPages {
 
 impl SubCommandPages {
     fn run(self, matrix: &schema::Matrix) -> miette::Result<()> {
+        let board_page_template = fs::read_to_string(&self.template_path).map_err(|source| {
+            Error::SummaryTemplateFile {
+                path: self.template_path.clone(),
+                source,
+            }
+        })?;
+
         let board_info = gen_functionalities(&matrix)?;
 
         for board in &board_info {
             let mut env = Environment::new();
-            env.add_template("board_page", BOARD_PAGE_TEMPLATE).unwrap();
+            env.add_template("board_page", &board_page_template)
+                .unwrap();
             let tmpl = env.get_template("board_page").unwrap();
             let board_page = tmpl
                 .render(context!(
@@ -396,7 +347,7 @@ impl SubCommandPages {
                     })?;
 
                 if existing_board_page != board_page {
-                    return Err(Error::ExistingHtmlNotUpToDate {
+                    return Err(Error::ExistingMarkdownNotUpToDate {
                         path: board_page_path.clone(),
                     }
                     .into());
@@ -636,4 +587,6 @@ enum Error {
     ReadingExistingFile { path: PathBuf, source: io::Error },
     #[error("existing HTML file `{path}` is not up to date")]
     ExistingHtmlNotUpToDate { path: PathBuf },
+    #[error("existing Markdown file `{path}` is not up to date")]
+    ExistingMarkdownNotUpToDate { path: PathBuf },
 }

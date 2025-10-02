@@ -30,7 +30,7 @@ jobs:
           toolchain: ${{ steps.get_toolchain.outputs.toolchain }}
 
       - name: Install laze
-        uses: taiki-e/install-action@ea0eda622640ac23a17ba349cf09e2709d58f5e1 # v2
+        uses: taiki-e/install-action@7fe7b8c79a3c5569643cf27dfc32456883a4cd4d # v2
         with:
           tool: laze@0.1
 
@@ -89,7 +89,7 @@ jobs:
         uses: Swatinem/rust-cache@98c8021b550208e191a6a3145459bfc9fb29c4c0 # v2
 
       - name: Install cargo-deny
-        uses: taiki-e/install-action@ea0eda622640ac23a17ba349cf09e2709d58f5e1 # v2
+        uses: taiki-e/install-action@7fe7b8c79a3c5569643cf27dfc32456883a4cd4d # v2
         with:
           tool: cargo-deny
 
@@ -378,7 +378,7 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
 
       - name: Install taplo
-        uses: taiki-e/install-action@ea0eda622640ac23a17ba349cf09e2709d58f5e1 # v2
+        uses: taiki-e/install-action@7fe7b8c79a3c5569643cf27dfc32456883a4cd4d # v2
         with:
           tool: taplo
           fallback: none
@@ -394,7 +394,7 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
 
       - name: Install cargo-manifest-check
-        uses: taiki-e/install-action@ea0eda622640ac23a17ba349cf09e2709d58f5e1 # v2
+        uses: taiki-e/install-action@7fe7b8c79a3c5569643cf27dfc32456883a4cd4d # v2
         with:
           tool: cargo-manifest-check@0.2
 
@@ -422,35 +422,28 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
 
       - name: typos
-        uses: crate-ci/typos@0c17dabcee8b8f1957fa917d17393a23e02e1583 # v1.36.3
+        uses: crate-ci/typos@40156d6074bf731adb169cfb8234954971dbc487 # v1.37.1
 
       - name: Check that the book summary has an up-to-date board list
-        run: ./doc/gen_book.rs summary doc/support_matrix.yml book/src/SUMMARY.md --template-path book/src/SUMMARY.md.tmpl --check
+        run: ./doc/gen_book.rs summary doc/support_matrix.yml book/src/SUMMARY.md --template-path book/templates/SUMMARY.md.tmpl --check
 
       - name: Check that the board pages are all up-to-date
-        run: ./doc/gen_book.rs board-pages doc/support_matrix.yml book/src/boards/ --check
+        run: ./doc/gen_book.rs board-pages doc/support_matrix.yml book/src/boards/ --check --template-path book/templates/board-page.md.tmpl
 
       - name: Check the support matrix generation exit code
         run: |
-          ./doc/gen_book.rs matrix doc/support_matrix.yml /dev/null --tier 1
-          ./doc/gen_book.rs matrix doc/support_matrix.yml /dev/null --tier 2
-          ./doc/gen_book.rs matrix doc/support_matrix.yml /dev/null --tier 3
+          ./doc/gen_book.rs matrix doc/support_matrix.yml /dev/null --tier 1 --template-path book/templates/support-matrix.html.tmpl
+          ./doc/gen_book.rs matrix doc/support_matrix.yml /dev/null --tier 2 --template-path book/templates/support-matrix.html.tmpl
+          ./doc/gen_book.rs matrix doc/support_matrix.yml /dev/null --tier 3 --template-path book/templates/support-matrix.html.tmpl
 
-      - name: Check the board list markdown generation exit code
+      - name: Check the board index page markdown generation exit code
         run: |
-          ./doc/gen_book.rs board-list doc/support_matrix.yml /dev/null --tier 1
-          ./doc/gen_book.rs board-list doc/support_matrix.yml /dev/null --tier 2
-          ./doc/gen_book.rs board-list doc/support_matrix.yml /dev/null --tier 3
+          ./doc/gen_book.rs board-index doc/support_matrix.yml /dev/null --template-path book/templates/board-index.md.tmpl
 
-      - name: Install mdbook and mdbook utils
-        uses: taiki-e/install-action@ea0eda622640ac23a17ba349cf09e2709d58f5e1 # v2
+      - name: Install mdbook
+        uses: taiki-e/install-action@7fe7b8c79a3c5569643cf27dfc32456883a4cd4d # v2
         with:
-          tool: mdbook, mdbook-cmdrun
-
-      - name: Check for unexpected cmdrun uses
-        run: |
-            cd book
-            ./cmdrun-check.sh
+          tool: mdbook@0.5.0-alpha.1
 
       - name: Build the book
         run: |
