@@ -213,12 +213,17 @@ name = "ariel-os-bindings"
 version = "0.1.0"
 dependencies = [
  "ariel-os-alloc",
+ "ariel-os-coap",
  "ariel-os-debug",
  "ariel-os-embassy",
  "ariel-os-random",
+ "coap-handler",
+ "coap-handler-implementations",
+ "coap-message",
+ "coap-message-demos",
  "embassy-futures",
  "rand_core",
- "wasmtime 38.0.0",
+ "wasmtime 39.0.0",
 ]
 
 [[package]]
@@ -1245,15 +1250,15 @@ dependencies = [
 
 [[package]]
 name = "coap-message-implementations"
-version = "0.1.7"
+version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "060fedad409e77697cd86138950fa0dd9bff22beac3f1761905367e14708c727"
+checksum = "e12d19c160c733ec97fb95c401015ef51c8621f74dce313c54cd56f93c612d55"
 dependencies = [
  "coap-message",
  "coap-message-utils",
  "coap-numbers",
  "document-features",
- "heapless 0.8.0",
+ "heapless 0.9.1",
 ]
 
 [[package]]
@@ -1370,7 +1375,7 @@ dependencies = [
  "embassy-futures",
  "embassy-sync 0.6.2",
  "lock_api",
- "wasmtime 38.0.0",
+ "wasmtime 39.0.0",
 ]
 
 [[package]]
@@ -1474,9 +1479,9 @@ dependencies = [
 
 [[package]]
 name = "cranelift-assembler-x64"
-version = "0.125.0"
+version = "0.126.0"
 dependencies = [
- "cranelift-assembler-x64-meta 0.125.0",
+ "cranelift-assembler-x64-meta 0.126.0",
 ]
 
 [[package]]
@@ -1490,9 +1495,9 @@ dependencies = [
 
 [[package]]
 name = "cranelift-assembler-x64-meta"
-version = "0.125.0"
+version = "0.126.0"
 dependencies = [
- "cranelift-srcgen 0.125.0",
+ "cranelift-srcgen 0.126.0",
 ]
 
 [[package]]
@@ -1506,9 +1511,9 @@ dependencies = [
 
 [[package]]
 name = "cranelift-bforest"
-version = "0.125.0"
+version = "0.126.0"
 dependencies = [
- "cranelift-entity 0.125.0",
+ "cranelift-entity 0.126.0",
 ]
 
 [[package]]
@@ -1523,7 +1528,7 @@ dependencies = [
 
 [[package]]
 name = "cranelift-bitset"
-version = "0.125.0"
+version = "0.126.0"
 dependencies = [
  "serde",
  "serde_derive",
@@ -1558,27 +1563,27 @@ dependencies = [
 
 [[package]]
 name = "cranelift-codegen"
-version = "0.125.0"
+version = "0.126.0"
 dependencies = [
  "bumpalo",
- "cranelift-assembler-x64 0.125.0",
- "cranelift-bforest 0.125.0",
- "cranelift-bitset 0.125.0",
- "cranelift-codegen-meta 0.125.0",
- "cranelift-codegen-shared 0.125.0",
- "cranelift-control 0.125.0",
- "cranelift-entity 0.125.0",
- "cranelift-isle 0.125.0",
+ "cranelift-assembler-x64 0.126.0",
+ "cranelift-bforest 0.126.0",
+ "cranelift-bitset 0.126.0",
+ "cranelift-codegen-meta 0.126.0",
+ "cranelift-codegen-shared 0.126.0",
+ "cranelift-control 0.126.0",
+ "cranelift-entity 0.126.0",
+ "cranelift-isle 0.126.0",
  "gimli",
  "hashbrown 0.15.3",
  "log",
- "pulley-interpreter 38.0.0",
+ "pulley-interpreter 39.0.0",
  "regalloc2 0.13.2",
  "rustc-hash 2.1.1",
  "serde",
  "smallvec",
  "target-lexicon",
- "wasmtime-internal-math 38.0.0",
+ "wasmtime-internal-math 39.0.0",
 ]
 
 [[package]]
@@ -1596,13 +1601,13 @@ dependencies = [
 
 [[package]]
 name = "cranelift-codegen-meta"
-version = "0.125.0"
+version = "0.126.0"
 dependencies = [
- "cranelift-assembler-x64-meta 0.125.0",
- "cranelift-codegen-shared 0.125.0",
- "cranelift-srcgen 0.125.0",
+ "cranelift-assembler-x64-meta 0.126.0",
+ "cranelift-codegen-shared 0.126.0",
+ "cranelift-srcgen 0.126.0",
  "heck 0.5.0",
- "pulley-interpreter 38.0.0",
+ "pulley-interpreter 39.0.0",
 ]
 
 [[package]]
@@ -1613,7 +1618,7 @@ checksum = "dc6acea40ef860f28cb36eaad479e26556c1e538b0a66fc44598cf1b1689393d"
 
 [[package]]
 name = "cranelift-codegen-shared"
-version = "0.125.0"
+version = "0.126.0"
 
 [[package]]
 name = "cranelift-control"
@@ -1626,7 +1631,7 @@ dependencies = [
 
 [[package]]
 name = "cranelift-control"
-version = "0.125.0"
+version = "0.126.0"
 dependencies = [
  "arbitrary",
 ]
@@ -1644,9 +1649,9 @@ dependencies = [
 
 [[package]]
 name = "cranelift-entity"
-version = "0.125.0"
+version = "0.126.0"
 dependencies = [
- "cranelift-bitset 0.125.0",
+ "cranelift-bitset 0.126.0",
  "serde",
  "serde_derive",
 ]
@@ -1665,9 +1670,9 @@ dependencies = [
 
 [[package]]
 name = "cranelift-frontend"
-version = "0.125.0"
+version = "0.126.0"
 dependencies = [
- "cranelift-codegen 0.125.0",
+ "cranelift-codegen 0.126.0",
  "log",
  "smallvec",
  "target-lexicon",
@@ -1681,7 +1686,7 @@ checksum = "928b8dccad51b9e0ffe54accbd617da900239439b13d48f0f122ab61105ca6ad"
 
 [[package]]
 name = "cranelift-isle"
-version = "0.125.0"
+version = "0.126.0"
 
 [[package]]
 name = "cranelift-native"
@@ -1696,9 +1701,9 @@ dependencies = [
 
 [[package]]
 name = "cranelift-native"
-version = "0.125.0"
+version = "0.126.0"
 dependencies = [
- "cranelift-codegen 0.125.0",
+ "cranelift-codegen 0.126.0",
  "libc",
  "target-lexicon",
 ]
@@ -1711,7 +1716,7 @@ checksum = "673bd6d1c83cb41d60afb140a1474ef6caf1a3e02f3820fc522aefbc93ac67d6"
 
 [[package]]
 name = "cranelift-srcgen"
-version = "0.125.0"
+version = "0.126.0"
 
 [[package]]
 name = "crc"
@@ -3336,6 +3341,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "gpio-wasm-explore"
+version = "0.0.0"
+dependencies = [
+ "ariel-os",
+ "ariel-os-boards",
+ "wasmtime 39.0.0",
+]
+
+[[package]]
 name = "group"
 version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3485,6 +3499,16 @@ dependencies = [
  "hash32 0.3.1",
  "portable-atomic",
  "serde",
+ "stable_deref_trait",
+]
+
+[[package]]
+name = "heapless"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1edcd5a338e64688fbdcb7531a846cfd3476a54784dcb918a0844682bc7ada5"
+dependencies = [
+ "hash32 0.3.1",
  "stable_deref_trait",
 ]
 
@@ -4911,12 +4935,12 @@ dependencies = [
 
 [[package]]
 name = "pulley-interpreter"
-version = "38.0.0"
+version = "39.0.0"
 dependencies = [
- "cranelift-bitset 0.125.0",
+ "cranelift-bitset 0.126.0",
  "log",
- "pulley-macros 38.0.0",
- "wasmtime-internal-math 38.0.0",
+ "pulley-macros 39.0.0",
+ "wasmtime-internal-math 39.0.0",
 ]
 
 [[package]]
@@ -4932,7 +4956,7 @@ dependencies = [
 
 [[package]]
 name = "pulley-macros"
-version = "38.0.0"
+version = "39.0.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -6364,7 +6388,7 @@ dependencies = [
  "ariel-os",
  "ariel-os-bindings",
  "ariel-os-boards",
- "wasmtime 38.0.0",
+ "wasmtime 39.0.0",
 ]
 
 [[package]]
@@ -6374,7 +6398,7 @@ dependencies = [
  "ariel-os",
  "ariel-os-bindings",
  "ariel-os-boards",
- "wasmtime 38.0.0",
+ "wasmtime 39.0.0",
 ]
 
 [[package]]
@@ -6383,12 +6407,16 @@ version = "0.0.0"
 dependencies = [
  "ariel-os",
  "ariel-os-boards",
+ "coap-handler",
  "coap-handler-implementations",
+ "coap-message",
+ "coap-message-implementations",
+ "coap-message-utils",
+ "coap-numbers",
  "coap-request",
  "coap-request-implementations",
- "embassy-futures",
  "embedded-nal-coap",
- "wasmtime 38.0.0",
+ "wasmtime 39.0.0",
 ]
 
 [[package]]
@@ -6594,7 +6622,7 @@ dependencies = [
 
 [[package]]
 name = "wasmtime"
-version = "38.0.0"
+version = "39.0.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -6611,23 +6639,23 @@ dependencies = [
  "memfd",
  "object 0.37.3",
  "postcard",
- "pulley-interpreter 38.0.0",
+ "pulley-interpreter 39.0.0",
  "semver 1.0.26",
  "serde",
  "serde_derive",
  "smallvec",
  "target-lexicon",
  "wasmparser 0.239.0",
- "wasmtime-environ 38.0.0",
- "wasmtime-internal-component-macro 38.0.0",
- "wasmtime-internal-component-util 38.0.0",
- "wasmtime-internal-cranelift 38.0.0",
+ "wasmtime-environ 39.0.0",
+ "wasmtime-internal-component-macro 39.0.0",
+ "wasmtime-internal-component-util 39.0.0",
+ "wasmtime-internal-cranelift 39.0.0",
  "wasmtime-internal-fiber",
- "wasmtime-internal-math 38.0.0",
- "wasmtime-internal-slab 38.0.0",
- "wasmtime-internal-unwinder 38.0.0",
- "wasmtime-internal-versioned-export-macros 38.0.0",
- "wasmtime-internal-winch 38.0.0",
+ "wasmtime-internal-math 39.0.0",
+ "wasmtime-internal-slab 39.0.0",
+ "wasmtime-internal-unwinder 39.0.0",
+ "wasmtime-internal-versioned-export-macros 39.0.0",
+ "wasmtime-internal-winch 39.0.0",
  "windows-sys 0.60.2",
 ]
 
@@ -6658,11 +6686,11 @@ dependencies = [
 
 [[package]]
 name = "wasmtime-environ"
-version = "38.0.0"
+version = "39.0.0"
 dependencies = [
  "anyhow",
- "cranelift-bitset 0.125.0",
- "cranelift-entity 0.125.0",
+ "cranelift-bitset 0.126.0",
+ "cranelift-entity 0.126.0",
  "gimli",
  "indexmap 2.9.0",
  "log",
@@ -6676,7 +6704,7 @@ dependencies = [
  "wasm-encoder 0.239.0",
  "wasmparser 0.239.0",
  "wasmprinter 0.239.0",
- "wasmtime-internal-component-util 38.0.0",
+ "wasmtime-internal-component-util 39.0.0",
 ]
 
 [[package]]
@@ -6705,14 +6733,14 @@ dependencies = [
 
 [[package]]
 name = "wasmtime-internal-component-macro"
-version = "38.0.0"
+version = "39.0.0"
 dependencies = [
  "anyhow",
  "proc-macro2",
  "quote",
  "syn 2.0.106",
- "wasmtime-internal-component-util 38.0.0",
- "wasmtime-internal-wit-bindgen 38.0.0",
+ "wasmtime-internal-component-util 39.0.0",
+ "wasmtime-internal-wit-bindgen 39.0.0",
  "wit-parser 0.239.0",
 ]
 
@@ -6724,7 +6752,7 @@ checksum = "edc23d46ec1b1cd42b6f73205eb80498ed94b47098ec53456c0b18299405b158"
 
 [[package]]
 name = "wasmtime-internal-component-util"
-version = "38.0.0"
+version = "39.0.0"
 
 [[package]]
 name = "wasmtime-internal-cranelift"
@@ -6755,40 +6783,40 @@ dependencies = [
 
 [[package]]
 name = "wasmtime-internal-cranelift"
-version = "38.0.0"
+version = "39.0.0"
 dependencies = [
  "anyhow",
  "cfg-if",
- "cranelift-codegen 0.125.0",
- "cranelift-control 0.125.0",
- "cranelift-entity 0.125.0",
- "cranelift-frontend 0.125.0",
- "cranelift-native 0.125.0",
+ "cranelift-codegen 0.126.0",
+ "cranelift-control 0.126.0",
+ "cranelift-entity 0.126.0",
+ "cranelift-frontend 0.126.0",
+ "cranelift-native 0.126.0",
  "gimli",
  "itertools 0.14.0",
  "log",
  "object 0.37.3",
- "pulley-interpreter 38.0.0",
+ "pulley-interpreter 39.0.0",
  "smallvec",
  "target-lexicon",
  "thiserror",
  "wasmparser 0.239.0",
- "wasmtime-environ 38.0.0",
- "wasmtime-internal-math 38.0.0",
- "wasmtime-internal-unwinder 38.0.0",
- "wasmtime-internal-versioned-export-macros 38.0.0",
+ "wasmtime-environ 39.0.0",
+ "wasmtime-internal-math 39.0.0",
+ "wasmtime-internal-unwinder 39.0.0",
+ "wasmtime-internal-versioned-export-macros 39.0.0",
 ]
 
 [[package]]
 name = "wasmtime-internal-fiber"
-version = "38.0.0"
+version = "39.0.0"
 dependencies = [
  "anyhow",
  "cc",
  "cfg-if",
  "libc",
  "rustix",
- "wasmtime-internal-versioned-export-macros 38.0.0",
+ "wasmtime-internal-versioned-export-macros 39.0.0",
  "windows-sys 0.60.2",
 ]
 
@@ -6803,7 +6831,7 @@ dependencies = [
 
 [[package]]
 name = "wasmtime-internal-math"
-version = "38.0.0"
+version = "39.0.0"
 dependencies = [
  "libm",
 ]
@@ -6816,7 +6844,7 @@ checksum = "6d152a7b875d62e395bfe0ae7d12e7b47cd332eb380353cce3eb831f9843731d"
 
 [[package]]
 name = "wasmtime-internal-slab"
-version = "38.0.0"
+version = "39.0.0"
 
 [[package]]
 name = "wasmtime-internal-unwinder"
@@ -6832,11 +6860,11 @@ dependencies = [
 
 [[package]]
 name = "wasmtime-internal-unwinder"
-version = "38.0.0"
+version = "39.0.0"
 dependencies = [
  "anyhow",
  "cfg-if",
- "cranelift-codegen 0.125.0",
+ "cranelift-codegen 0.126.0",
  "log",
  "object 0.37.3",
 ]
@@ -6854,7 +6882,7 @@ dependencies = [
 
 [[package]]
 name = "wasmtime-internal-versioned-export-macros"
-version = "38.0.0"
+version = "39.0.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -6880,18 +6908,18 @@ dependencies = [
 
 [[package]]
 name = "wasmtime-internal-winch"
-version = "38.0.0"
+version = "39.0.0"
 dependencies = [
  "anyhow",
- "cranelift-codegen 0.125.0",
+ "cranelift-codegen 0.126.0",
  "gimli",
  "log",
  "object 0.37.3",
  "target-lexicon",
  "wasmparser 0.239.0",
- "wasmtime-environ 38.0.0",
- "wasmtime-internal-cranelift 38.0.0",
- "winch-codegen 38.0.0",
+ "wasmtime-environ 39.0.0",
+ "wasmtime-internal-cranelift 39.0.0",
+ "winch-codegen 39.0.0",
 ]
 
 [[package]]
@@ -6909,7 +6937,7 @@ dependencies = [
 
 [[package]]
 name = "wasmtime-internal-wit-bindgen"
-version = "38.0.0"
+version = "39.0.0"
 dependencies = [
  "anyhow",
  "bitflags 2.9.1",
@@ -6949,20 +6977,20 @@ dependencies = [
 
 [[package]]
 name = "winch-codegen"
-version = "38.0.0"
+version = "39.0.0"
 dependencies = [
  "anyhow",
- "cranelift-assembler-x64 0.125.0",
- "cranelift-codegen 0.125.0",
+ "cranelift-assembler-x64 0.126.0",
+ "cranelift-codegen 0.126.0",
  "gimli",
  "regalloc2 0.13.2",
  "smallvec",
  "target-lexicon",
  "thiserror",
  "wasmparser 0.239.0",
- "wasmtime-environ 38.0.0",
- "wasmtime-internal-cranelift 38.0.0",
- "wasmtime-internal-math 38.0.0",
+ "wasmtime-environ 39.0.0",
+ "wasmtime-internal-cranelift 39.0.0",
+ "wasmtime-internal-math 39.0.0",
 ]
 
 [[package]]

@@ -10,6 +10,9 @@ pub mod time;
 #[cfg(feature = "udp")]
 pub mod udp;
 
+// #[cfg(feature = "coap-server")]
+// mod coap_server;
+
 pub struct ArielHost<'a> {
     #[cfg(all(feature = "rng", feature = "async"))]
     rng: ariel_os_random::FastRngSend,
@@ -26,8 +29,13 @@ pub struct ArielHost<'a> {
     #[cfg(feature = "udp")]
     buffer_size: usize,
 
-    // Used to mark the lifetime when the "udp" feature is not used
+    // #[cfg(feature = "coap-server")]
+    // coap_server_host: coap_server::ArielCoapServerHost,
+
+    // Used to mark the lifetime and type parameter(s) when the features don't use them
     _marker: core::marker::PhantomData<&'a ()>,
+
+
 }
 
 #[allow(clippy::derivable_impls, reason = "conditional compilation")]
@@ -46,7 +54,11 @@ impl Default for ArielHost<'_> {
             #[cfg(feature = "udp")]
             buffer_size: 0,
 
+            // #[cfg(feature = "coap-server")]
+            // coap_server_host: coap_server::ArielCoapServerHost::default(),
+
             _marker: core::marker::PhantomData,
+
         }
     }
 }
@@ -131,6 +143,8 @@ mod udp_impl {
     use super::udp;
     use super::ArielHost;
 
+    use core::mem;
+
     extern crate alloc;
     use alloc::vec::Vec;
 
@@ -152,6 +166,11 @@ mod udp_impl {
             tx_buffer: &'a mut [u8],
         ) {
             let buff_size = tx_buffer.len();
+            let rx_meta: &'static mut [PacketMetadata] = unsafe { mem::transmute(rx_meta) };
+            let rx_buffer: &'static mut [u8] = unsafe { mem::transmute(rx_buffer) };
+            let tx_meta: &'static mut [PacketMetadata] = unsafe { mem::transmute(tx_meta) };
+            let tx_buffer: &'static mut [u8] = unsafe { mem::transmute(tx_buffer) };
+
             let socket = Some(UdpSocket::new(
                 stack, rx_meta, rx_buffer,
                 tx_meta, tx_buffer
@@ -300,3 +319,20 @@ mod udp_impl {
 
     impl udp::Host for ArielHost<'_> {}
 }
+
+
+// #[cfg(feature = "coap-server")]
+// mod coap_server_impl {
+//     use super::coap_server;
+//     use super::ArielHost;
+//     impl coap_server::Host for ArielHost<'_> {
+//         fn register(&mut self, at: &str, response: coap_server::CoapReply) {
+//             todo!()
+//         }
+
+//         async  fn run(&mut self,) {
+//             todo!()
+//         }
+
+//     }
+// }

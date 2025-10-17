@@ -11,7 +11,7 @@ thiserror = { version = "2.0.12" }
 
 ---
 #![feature(trim_prefix_suffix)]
-use std::{fs, io, path::PathBuf};
+use std::{fs, io, path::{PathBuf, Path}};
 use clap::Parser;
 use miette::Diagnostic;
 
@@ -37,6 +37,10 @@ struct Args {
     /// Path to wasm-tools if isn't not in $PATH
     #[arg(short, long)]
     wasm_tools: Option<PathBuf>,
+
+    /// Outputs a Module instead of a component
+    #[arg(short, long)]
+    module: bool,
 }
 
 #[derive(Debug, thiserror::Error, Diagnostic)]
@@ -52,22 +56,23 @@ enum Error {
 fn main() -> miette::Result<()> {
     let args = Args::parse();
 
-    let Args { path, fuel, output, wasm_tools } = args;
+    let Args { path, fuel, output, wasm_tools, module } = args;
 
 
     assert!(fs::exists(&path).map_err(Error::from)?);
-
-    // Turn into a component
-    let wasm_tools_path = if wasm_tools.is_some() {
-        wasm_tools.unwrap()
-    } else {
-        "wasm-tools".into()
-    };
-    // Note: On Unix, non UTF8 strings are invalid Paths so the unwrap() is infallible
-    std::process::Command::new(wasm_tools_path)
-        .args(["component", "new", path.as_path().to_str().unwrap(), "-o", "temp.wasm"])
-        .output()
-        .map_err(Error::from)?;
+    if !module {
+        // Turn into a component
+        let wasm_tools_path = if wasm_tools.is_some() {
+            wasm_tools.unwrap()
+        } else {
+            "wasm-tools".into()
+        };
+        // Note: On Unix, non UTF8 strings are invalid Paths so the unwrap() is infallible
+        std::process::Command::new(wasm_tools_path)
+            .args(["component", "new", path.as_path().to_str().unwrap(), "-o", "temp.wasm"])
+            .output()
+            .map_err(Error::from)?;
+    }
 
     let out = if output.is_some() {
         output.unwrap()
@@ -76,13 +81,15 @@ fn main() -> miette::Result<()> {
         temp.set_extension("cwasm");
         temp
     };
-
-    precompile("temp.wasm", fuel, out)?;
-
+    if !module {
+        precompile("temp.wasm", fuel, out, module)?;
+    } else {
+        precompile(&path, fuel, out, module)?;
+    }
     Ok(())
 }
 
-fn precompile(path: &str, fuel: bool, out: PathBuf) -> miette::Result<()> {
+fn precompile<P: AsRef<Path>>(path: P, fuel: bool, out: PathBuf, module: bool) -> miette::Result<()> {
 
     let mut config = Config::new();
     // Tell how the memory is expected to behave when instantiated
@@ -103,8 +110,12 @@ fn precompile(path: &str, fuel: bool, out: PathBuf) -> miette::Result<()> {
     let engine = Engine::new(&config).map_err(Error::from)?;
 
     let wasm = fs::read(path).map_err(Error::from)?;
+    let precompiled = if !module {
+        engine.precompile_component(&wasm).map_err(Error::from)?
+    } else {
+        engine.precompile_module(&wasm).map_err(Error::from)?
+    };
 
-    let precompiled = engine.precompile_component(&wasm).map_err(Error::from)?;
 
     fs::write(out, &precompiled).map_err(Error::from)?;
 

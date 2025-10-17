@@ -1,4 +1,7 @@
 apps:
   - name: wasm-coap-interop
     selects:
-      - coap-client
+      - usb-ethernet
+      - network-config-ipv4-static
+      - coap-server
+      - ?coap-server-config-unprotected

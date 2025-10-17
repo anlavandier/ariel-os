@@ -1,0 +1,13 @@
+package coap-sever-example:test;
+
+interface coap-server-guest {
+    alloc-coap-buffer: func(len:u32) -> u32;
+    coap-run:  func();
+}
+
+
+world example {
+    import ariel:wasm-bindings/log-api@0.0.1;
+
+    export coap-server-guest;
+}
