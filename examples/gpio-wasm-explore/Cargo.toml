@@ -1,0 +1,14 @@
+[package]
+name = "gpio-wasm-explore"
+license.workspace = true
+edition.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+ariel-os = { path = "../../src/ariel-os", features = ["time", "external-interrupts", "alloc"] }
+ariel-os-boards = { path = "../../src/ariel-os-boards" }
+
+wasmtime = { workspace = true, default-features = false, features = ["runtime", "pulley", "component-model", "async"] }
