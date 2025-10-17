@@ -2,6 +2,7 @@
 
 #![no_std]
 #![cfg_attr(nightly, feature(doc_auto_cfg))]
+#![allow(unsafe_code)]
 
 pub use ariel_os_hal::hal;
 
@@ -205,6 +206,9 @@ async fn init_task(mut peripherals: hal::OptionalPeripherals) {
 
     debug!("ariel-os-embassy::init_task()");
 
+    #[cfg(board_init)]
+    ariel_os_boards::init(&mut peripherals);
+
     #[cfg(all(context = "stm32", feature = "external-interrupts"))]
     hal::extint_registry::EXTINT_REGISTRY.init(&mut peripherals);
 
@@ -213,6 +217,9 @@ async fn init_task(mut peripherals: hal::OptionalPeripherals) {
 
     #[cfg(feature = "spi")]
     hal::spi::init(&mut peripherals);
+
+    #[cfg(feature = "uart")]
+    hal::uart::init(&mut peripherals);
 
     #[cfg(feature = "hwrng")]
     hal::hwrng::construct_rng(&mut peripherals);
