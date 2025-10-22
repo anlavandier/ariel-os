@@ -1262,7 +1262,6 @@ modules:
       - doc_only
 
   - name: has_nrf_ble
-    help: Marks an incompatibility of nrf devices with the interrupt executor (MPSL crashing)
     context:
       - nrf52
       - nrf53
@@ -1270,8 +1269,6 @@ modules:
       - hwrng
     provides:
       - has_ble
-    conflicts:
-      - executor-interrupt
 
   - name: ble-peripheral
     help: Enables BLE peripheral functionality
@@ -1757,6 +1754,16 @@ builders:
           - echo "Installing c2rust..."
           - 'echo "WARNING: This uses *a lot* of memory!"'
           - cargo install c2rust $@
+      update-book:
+        build: false
+        cmd:
+          - doc/gen_book.rs summary doc/support_matrix.yml book/src/SUMMARY.md --template-path book/templates/SUMMARY.md.tmpl
+          - doc/gen_book.rs board-pages doc/support_matrix.yml book/src/boards/ --template-path book/templates/board-page.md.tmpl
+          - doc/gen_book.rs board-index doc/support_matrix.yml book/src/boards/index.md --template-path book/templates/board-index.md.tmpl
+          - doc/gen_book.rs matrix doc/support_matrix.yml book/src/support_matrix_tier1.html --template-path book/templates/support-matrix.html.tmpl --tier 1
+          - doc/gen_book.rs matrix doc/support_matrix.yml book/src/support_matrix_tier2.html --template-path book/templates/support-matrix.html.tmpl --tier 2
+          - doc/gen_book.rs matrix doc/support_matrix.yml book/src/support_matrix_tier3.html --template-path book/templates/support-matrix.html.tmpl --tier 3
+
 
   - name: bbc-microbit
     parent: bbc-microbit-base

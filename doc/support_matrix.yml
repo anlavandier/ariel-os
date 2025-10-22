@@ -229,6 +229,7 @@ chips:
       hwrng: supported
       i2c_controller: supported
       spi_main: supported
+      uart: supported
       logging: supported
       storage:
         status: not_currently_supported
@@ -268,6 +269,29 @@ chips:
           - no generic USB peripheral
       ethernet_over_usb: not_available
 
+  # Currently identical to esp32c6.
+  esp32c6fx4:
+    name: ESP32-C6Fx4
+    support:
+      gpio: supported
+      debug_output: supported
+      hwrng: supported
+      i2c_controller: supported
+      spi_main: supported
+      uart: supported
+      logging: supported
+      storage:
+        status: not_currently_supported
+        comments:
+          - requires partitioning support
+      wifi:
+        status: supported
+      user_usb:
+        status: not_available
+        comments:
+          - no generic USB peripheral
+      ethernet_over_usb: not_available
+
   esp32s3:
     name: ESP32-S3
     support:
@@ -299,6 +323,7 @@ chips:
       hwrng: supported
       i2c_controller: needs_testing
       spi_main: needs_testing
+      uart: supported
       logging: supported
       storage:
         status: not_currently_supported
@@ -321,7 +346,7 @@ chips:
       hwrng: not_available
       i2c_controller: supported
       spi_main: supported
-      uart: not_currently_supported
+      uart: supported
       logging: supported
       storage:
         status: not_currently_supported
@@ -339,7 +364,7 @@ chips:
       hwrng: not_available
       i2c_controller: not_currently_supported
       spi_main: not_currently_supported
-      uart: not_currently_supported
+      uart: needs_testing
       logging: supported
       storage:
         status: not_currently_supported
@@ -357,7 +382,7 @@ chips:
       hwrng: not_available
       i2c_controller: needs_testing
       spi_main: needs_testing
-      uart: not_currently_supported
+      uart: supported
       logging: supported
       storage:
         status: not_currently_supported
@@ -375,7 +400,7 @@ chips:
       hwrng: not_available
       i2c_controller: supported
       spi_main: supported
-      uart: not_currently_supported
+      uart: needs_testing
       logging: supported
       storage:
         status: not_currently_supported
@@ -398,7 +423,7 @@ chips:
       hwrng: supported
       i2c_controller: supported
       spi_main: supported
-      uart: not_currently_supported
+      uart: supported
       logging: supported
       storage:
         status: supported_with_caveats
@@ -420,7 +445,7 @@ chips:
       hwrng: supported
       i2c_controller: needs_testing
       spi_main: needs_testing
-      uart: not_currently_supported
+      uart: needs_testing
       logging: supported
       storage:
         status: supported_with_caveats
@@ -437,6 +462,7 @@ chips:
       hwrng: supported
       i2c_controller: needs_testing
       spi_main: needs_testing
+      uart: needs_testing
       logging: supported
       storage:
         status: supported_with_caveats
@@ -453,7 +479,7 @@ chips:
       hwrng: supported
       i2c_controller: supported
       spi_main: supported
-      uart: not_currently_supported
+      uart: supported
       logging: supported
       storage:
         status: supported_with_caveats
@@ -475,7 +501,7 @@ chips:
       hwrng: supported
       i2c_controller: supported
       spi_main: supported
-      uart: not_currently_supported
+      uart: supported
       logging: supported
       storage: supported
       wifi: not_available
@@ -488,7 +514,7 @@ chips:
       hwrng: supported
       i2c_controller: supported
       spi_main: supported
-      uart: not_currently_supported
+      uart: supported
       logging: supported
       storage:
         status: supported_with_caveats
@@ -504,7 +530,7 @@ chips:
       hwrng: supported
       i2c_controller: not_currently_supported
       spi_main: not_currently_supported
-      uart: not_currently_supported
+      uart: needs_testing
       logging: supported
       storage:
         status: not_currently_supported
@@ -522,7 +548,7 @@ chips:
       hwrng: supported
       i2c_controller: not_currently_supported
       spi_main: not_currently_supported
-      uart: not_currently_supported
+      uart: needs_testing
       logging: supported
       storage: supported
       wifi: not_available
@@ -628,6 +654,13 @@ boards:
       user_usb: supported
       wifi: supported
       ethernet_over_usb: supported
+
+  dfrobot-firebeetle2-esp32-c6:
+    name: DFRobot FireBeetle 2 ESP32-C6
+    url: https://web.archive.org/web/20250710082029/https://wiki.dfrobot.com/SKU_DFR1075_FireBeetle_2_Board_ESP32_C6
+    chip: esp32c6fx4
+    tier: "2"
+    support:
 
   espressif-esp32-c3-lcdkit:
     name: Espressif ESP32-C3-LCDkit
