@@ -27,7 +27,7 @@ workspace = true
 
 [features]
 rng = ["dep:rand_core", "dep:ariel-os-random"]
-# udp = ["ariel-os-embassy/udp", "ariel-os-embassy/net", "dep:embassy-futures"]
+udp = ["ariel-os-embassy/udp", "ariel-os-embassy/net", "dep:embassy-futures"]
 time = ["ariel-os-embassy/time", "dep:embassy-futures"]
 log = ["dep:ariel-os-debug"]
 async = ["wasmtime/async"]
