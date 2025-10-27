@@ -32,6 +32,8 @@ async fn run_wasm_coap_server() -> wasmtime::Result<()> {
 
     let wasm = include_bytes!("../coap-server-impl.cwasm");
     // let wasm = [];
+
+    #[allow(unsafe_code)]
     let component = unsafe { Module::deserialize_raw(&engine, wasm.as_slice().into())? };
 
     let mut linker = Linker::new(&engine);
@@ -39,6 +41,7 @@ async fn run_wasm_coap_server() -> wasmtime::Result<()> {
     linker.func_wrap("log","info", |mut caller: Caller<'_, _>, str_ptr: u32, str_len: u32| {
         match caller.get_export("memory") {
             Some(Extern::Memory(mem)) => {
+                #[allow(unsafe_code)]
                 let wasm_str = unsafe { core::str::from_utf8_unchecked(&mem.data(caller.as_context())[str_ptr as usize .. str_ptr as usize + str_len as usize]) };
                 info!("[WASM] {}", wasm_str);
             },
@@ -67,14 +70,19 @@ async fn run_wasm_coap_server() -> wasmtime::Result<()> {
 // I have no idea whether this is safe or not.
 // https://github.com/bytecodealliance/wasmtime/blob/aec935f2e746d71934c8a131be15bbbb4392138c/crates/wasmtime/src/runtime/vm/traphandlers.rs#L888
 static mut TLS_PTR: u32 = 0;
+
+#[allow(unsafe_code)]
 #[unsafe(no_mangle)]
 extern "C" fn wasmtime_tls_get() -> *mut u8 {
+    #[allow(unsafe_code)]
     unsafe { TLS_PTR as *mut u8 }
 }
 
+#[allow(unsafe_code)]
 #[unsafe(no_mangle)]
 extern "C" fn wasmtime_tls_set(val: *const u8) {
-   unsafe { TLS_PTR = val as u32 };
+    #[allow(unsafe_code)]
+    unsafe { TLS_PTR = val as u32 };
 }
 
 
