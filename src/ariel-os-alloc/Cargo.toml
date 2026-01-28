@@ -31,6 +31,7 @@ embedded-test = { workspace = true }
 
 [features]
 _test = []
+pimp-my-alloc = ["esp-alloc/pimp-my-alloc"]
 
 [lints]
 workspace = true

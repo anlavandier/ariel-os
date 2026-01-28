@@ -13,6 +13,14 @@
 #[cfg(not(test))]
 pub use alloc::init;
 
+#[cfg(context = "cortex-m")]
+use embedded_alloc::TlsfHeap as Heap;
+
+/// Heap implementing the GlobalAlloc Trait
+#[cfg(context = "cortex-m")]
+#[cfg_attr(not(feature = "pimp-my-alloc"), global_allocator)]
+pub static HEAP: Heap = const { Heap::empty() };
+
 #[cfg(not(test))]
 mod alloc {
     const CONFIG_HEAPSIZE: usize =
@@ -46,11 +54,6 @@ mod alloc {
     unsafe fn init_embedded_alloc() {
         use ariel_os_debug::log::debug;
 
-        use embedded_alloc::TlsfHeap as Heap;
-
-        #[global_allocator]
-        static HEAP: Heap = const { Heap::empty() };
-
         unsafe extern "C" {
             static __sheap: u32;
             static __eheap: u32;
@@ -68,7 +71,7 @@ mod alloc {
             size, start
         );
 
-        unsafe { HEAP.init(start, size) }
+        unsafe { crate::HEAP.init(start, size) }
     }
 
     /// Initializes an `esp_alloc` heap.
