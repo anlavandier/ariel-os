@@ -18,7 +18,7 @@ use embedded_alloc::TlsfHeap as Heap;
 
 /// Heap implementing the GlobalAlloc Trait
 #[cfg(context = "cortex-m")]
-#[cfg_attr(not(feature = "pimp-my-alloc"), global_allocator)]
+#[cfg_attr(not(feature = "expose-allocator"), global_allocator)]
 pub static HEAP: Heap = const { Heap::empty() };
 
 #[cfg(not(test))]
