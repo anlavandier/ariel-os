@@ -266,7 +266,6 @@ dependencies = [
  "ariel-os-storage",
  "ariel-os-threads",
  "ariel-os-utils",
- "cfg-if",
  "const-str",
  "const_panic",
  "critical-section",
