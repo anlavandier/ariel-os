@@ -1840,7 +1840,6 @@ modules:
   - name: defmt-rtt
     help: private
     provides_unique:
-      - ariel-os-debug-backend
       - rtt-implementation
     env:
       global:
@@ -1851,7 +1850,6 @@ modules:
   - name: rtt-target
     help: private
     provides_unique:
-      - ariel-os-debug-backend
       - rtt-implementation
     env:
       global:
@@ -1904,8 +1902,6 @@ modules:
       - stm32u083c-dk
     selects:
       - log # We could later support defmt as well
-    provides_unique:
-      - ariel-os-debug-backend
     env:
       global:
         FEATURES:
@@ -1956,8 +1952,6 @@ modules:
     help: private
     context:
       - esp
-    provides_unique:
-      - ariel-os-debug-backend
     env:
       global:
         FEATURES:
