@@ -76,7 +76,50 @@ Note: On Cortex-M devices, the order of `ariel_os::log::println!()` output and
 
 Ariel OS's logger for `log` supports configuring the log level globally, but does not currently support per-crate filtering.
 
+## Logging Transports
+
+Logging can use various transports, but currently only one can be used at a time.
+The table below presents those supported in Ariel OS and which hardware and host tool are required:
+
+| Logging transport                        | Supported               | laze module                  | Required hardware                                                                         | Required host tool              |
+| ---------------------------------------- | :---------------------: | ---------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------- |
+| Debug channel                            | Available on all chips  | `logging-over-debug-channel` | Debug probe attached to the debug interface                                               | Debug channel-enabled host tool |
+| [USB CDC-ACM][usb-cdc-acm-glossary-book] | On ESP32 MCUs only      | `logging-over-usb`           | USB cable attached to the user USB port                                                   | Serial monitor                  |
+| [UART][uart-glossary-book]               | On ESP32 MCUs only      | `logging-over-uart`          | USB ⟷ UART adapter attached to the supported UART pins (may already be part of the board) | Serial monitor                  |
+
+> [!IMPORTANT]
+> When using [`defmt` as logging facade](#defmt), a `defmt`-enabled host tool must be used so that logs are rendered correctly, as `defmt` uses its own encoding on the wire.
+> probe-rs and `espflash` both support `defmt`'s encoding transparently.
+>
+> When a separate serial monitor is needed, [`defmt-print`][defmt-print-cratesio] can be used as `defmt`-enabled serial monitor.
+> If this is not possible, `defmt` should be disabled and [`log`](#log) used instead as logging facade.
+
+<!-- TODO: link to "debug interface" when the page exists -->
+> [!TIP]
+> When a logging transport other than the debug channel is enabled, logging can still be used when the debug channel is disabled either in software (by disabling the `logging-over-debug-channel` laze module) or in hardware when the debug interface itself is disabled.
+> This means that logging can still be used in production, even if the debug interface has been disabled.
+>
+> If this is unwanted, logging can be disabled altogether by disabling the [`logging`](#logging) laze module.
+
+> [!NOTE]
+> Future plans for logging facilities:
+>
+> - Other logging transports will later be supported, including UART and USB CDC-ACM on non-ESP32 devices.
+> - Using multiple transports at the same time may be supported in the future.
+
+On ESP32 devices, Ariel OS uses [`espflash`][espflah-cratesio] by default to obtain and print logs.
+Currently, the firmware automatically switches at runtime between using USB CDC-ACM or UART as logging transport.
+
+> [!WARNING]
+> This is likely to change in the future, and it may become necessary to select a specific laze module to choose which logging transport to enable and use.
+
 [defmt]: https://github.com/knurling-rs/defmt
 [defmt documentation]: https://defmt.ferrous-systems.com/
 [log]: https://github.com/rust-lang/log
 [laze-modules-book]: ./build-system.md#laze-modules
+[usb-cdc-acm-glossary-book]: ./glossary.md#usb-cdc-acm
+[uart-glossary-book]: ./glossary.md#uart
+[log-mod-rustdoc]: https://ariel-os.github.io/ariel-os/dev/docs/api/ariel_os/log/index.html
+[defmt-print-cratesio]: https://crates.io/crates/defmt-print
+[debug-console-debug-console-book]: ./debug-console.md#debug-console
+[espflah-cratesio]: https://crates.io/crates/espflash
