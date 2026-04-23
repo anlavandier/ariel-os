@@ -8,7 +8,11 @@ license.workspace = true
 
 [package.metadata.feature-groups]
 logging-facade.xor = { features = ["defmt", "log"] }
-logging-transport.xor = { features = ["defmt-rtt", "esp-println", "uart"] }
+logging-transport.xor = { features = [
+  "defmt-rtt",
+  "logging-over-uart",
+  "logging-over-usb",
+] }
 
 [dependencies]
 ariel-os-debug = { workspace = true }
@@ -22,7 +26,6 @@ log = { workspace = true, optional = true }
 
 [target.'cfg(context = "esp")'.dependencies]
 esp-println = { workspace = true, optional = true, features = [
-  "auto",
   "colors",
   "critical-section",
 ] }
@@ -48,13 +51,17 @@ defmt = ["dep:defmt", "esp-println?/defmt-espflash"]
 ## Enables `log` as logging facade.
 log = ["dep:ariel-os-utils", "dep:const-str", "dep:critical-section", "dep:log"]
 
+# Enables the `esp-println` crate.
+esp-println = ["dep:esp-println"]
+
 # Logging transports.
+debug-uart = ["dep:embassy-sync", "logging-over-uart"]
 # `defmt-rtt` forces the logging transport to be the debug output, so it has to
 # go through this crate.
 defmt-rtt = ["ariel-os-debug/defmt-rtt"]
-esp-println = ["dep:esp-println"]
+logging-over-uart = ["esp-println?/uart"]
+logging-over-usb = ["esp-println?/jtag-serial"]
 std = []
-uart = ["dep:embassy-sync"]
 
 _test = []
 
