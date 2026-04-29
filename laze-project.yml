@@ -1441,6 +1441,13 @@ modules:
         FEATURES:
           - ariel-os/usb
 
+  # Provided by boards having a USB port connected to a USB peripheral
+  # supporting USB CDC-ACM while not being a generic USB peripheral.
+  # A board may *also* have `has_usb_device_port`.
+  - name: has_usb_cdc_acm_port
+    selects:
+      - doc-only
+
   - name: hw/usb-device-port
     help: provided if a device has a USB device port wired up
     selects:
