@@ -1437,12 +1437,25 @@ modules:
           - ariel-os/nrf91-modem
 
   - name: usb
+    disables:
+      # Currently the generic USB should take priority.
+      - usb-cdc-acm-esp
     selects:
       - hw/usb-device-port
     env:
       global:
         FEATURES:
           - ariel-os/usb
+
+  # Available on ESP32 boards with ESP32 having a non-generic USB CDC-ACM
+  # peripheral (they may *also* have a generic USB peripheral) and a USB port
+  # connected to it.
+  - name: usb-cdc-acm-esp
+    context:
+      - esp
+    selects:
+      - has_usb_cdc_acm
+      - has_usb_cdc_acm_port
 
   # Provided by ESP32 MCUs with a non-generic USB CDC-ACM peripheral (they may
   # *also* have a generic USB peripheral).
@@ -1881,14 +1894,9 @@ modules:
 
   - name: logging-over-usb
     help: use USB CDC-ACM as logging transport
-    # Temporarily restricted to ESP32s having a USB CDC-ACM/JTAG USB peripheral
-    # until introducing a `usb-cdc-acm-esp` module.
-    # Should be later extended to chips with a generic USB peripheral.
-    context:
-      - esp32s3
-      - esp32c3
-      - esp32c6
     selects:
+      # Temporarily restricted to ESP32s having a USB CDC-ACM/JTAG USB peripheral.
+      - usb-cdc-acm-esp
       - context::esp:
           - esp-println
     provides_unique:
