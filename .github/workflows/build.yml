@@ -50,9 +50,10 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         env:
           BUILD_RUNNER: ${{ vars.BUILD_RUNNER }}
+          COMMIT_ID: ${{ steps.get-commit-id.outputs.commit_id }}
         with:
-          script: | # zizmor: ignore[template-injection] input is always a commit SHA
-            const commitId = "${{ steps.get-commit-id.outputs.commit_id }}";
+          script: |
+            const commitId = process.env.COMMIT_ID;
             console.log(`Commit ID: ${commitId}`);
             const { data: { items } } = await github.rest.search.issuesAndPullRequests({
               q: `${commitId} type:pr`,
@@ -82,8 +83,8 @@ jobs:
               // Read the environment variable, if none use the self-hosted default.
               let runnerLabel = process.env.BUILD_RUNNER || SELF_HOSTED_RUNNER_LABEL;
 
-              // Override the previous value if we have the corresponding PR label.
-              if (prLabels.includes("ci-host:github")) {
+              // Override the previous value if we have the corresponding PR label (doesn't apply when it's a scheduled job).
+              if (prLabels.includes("ci-host:github") && "${{ github.event_name }}" != "schedule") {
                 runnerLabel = GITHUB_HOSTED_RUNNER_LABEL;
               }
 
