@@ -72,7 +72,7 @@ impl<I2C: I2c + Send> Aht20<I2C> {
 
             // Check for calibration status
             loop {
-                // The read the status byte to check
+                // Read the status byte to check
                 let mut buf = [0u8];
                 if i2c_device
                     .write_read(
@@ -201,7 +201,7 @@ impl<I2C: I2c + Send> Aht20<I2C> {
                     return Err(ReadingError::SensorAccess);
                 }
                 Ok(()) => {
-                    // Check if the busy bit of the status register is set to 1
+                    // Check if the busy bit of the status register is still set
                     if buf[0] & crate::BUSY_BIT == 0 {
                         break;
                     }
@@ -221,18 +221,19 @@ impl<I2C: I2c + Send> Aht20<I2C> {
             return Err(ReadingError::SensorAccess);
         }
 
+        // The relative humidity and temperature are each encoded on 20 bits, over 5 bytes.
         let humidity =
-            (u32::from(buf[1]) << 12) + (u32::from(buf[2]) << 4) + u32::from(buf[3]) / 16;
+            (i32::from(buf[1]) << 12) + (i32::from(buf[2]) << 4) + i32::from(buf[3] & 0b1111_0000 >> 4);
         let temperature =
-            ((u32::from(buf[3]) % 16) << 16) + (u32::from(buf[4]) << 8) + u32::from(buf[5]);
+            (i32::from(buf[3] & 0b0000_1111) << 16) + (i32::from(buf[4]) << 8) + i32::from(buf[5]);
 
         // H = (Sh / 2^20) * 100 % see Section 6.1 of the Datasheet.
         // This naturally brings the resolution down the %.
-        let humi = (humidity.cast_signed() * 100) >> 20;
+        let humi = (humidity * 100) >> 20;
 
         // T = (St / 2^20) * 200 - 50 see Section 6.2 of the Datasheet.
         // We pre-multiply by 10 to keep the decimal digit
-        let temp = ((temperature.cast_signed() * 200 * 10) >> 20) - 500;
+        let temp = ((temperature * 200 * 10) >> 20) - 500;
 
         let h_accuracy = crate::h_accuracy(humi);
         let sample_humi = Sample::new(humi, h_accuracy);
