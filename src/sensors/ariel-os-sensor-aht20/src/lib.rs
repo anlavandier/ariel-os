@@ -15,8 +15,8 @@ use crc::{CRC_8_NRSC_5, Crc};
 #[derive(Copy, Clone, PartialEq, Eq)]
 /// Commands that can be sent to the sensor. Described in Table 9 and in section 5.4.
 enum Command {
-    /// Initializes the sensor
-    /// In particular this set the calibration bit.
+    /// Initializes the sensor.
+    /// In particular this sets the calibration bit.
     /// This requires the [`INITIALIZE_ARG_0`] and [`INITIALIZE_ARG_1`] arguments.
     Initialize = 0xBE,
 
