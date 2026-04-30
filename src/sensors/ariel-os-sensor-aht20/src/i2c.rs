@@ -327,8 +327,7 @@ mod tests {
     use embedded_hal_async::i2c::{ErrorKind, Operation};
 
     use super::*;
-    use crate::Command::ReadStatusReg;
-    use crate::Command::TriggerMeasurement;
+    use crate::Command::{ReadStatusReg, SoftReset, TriggerMeasurement};
     use crate::calculate_crc;
     use crate::{MEASUREMENT_ARG_0, MEASUREMENT_ARG_1};
 
@@ -362,10 +361,12 @@ mod tests {
                     command if command == ReadStatusReg as u8 => rbuf[0] = 0b0001_1000,
                     _ => panic!("unknown command {:?}", wbuf),
                 },
-                [Operation::Write(wbuf)] => match [wbuf[0], wbuf[1], wbuf[2]] {
-                    [command, MEASUREMENT_ARG_0, MEASUREMENT_ARG_1]
-                        if command == TriggerMeasurement as u8 =>
-                    {
+                [Operation::Write(wbuf)] => match wbuf[0] {
+                    command if command == SoftReset as u8 => {}
+                    command if command == TriggerMeasurement as u8 => {
+                        assert_eq!(wbuf.len(), 3);
+                        assert_eq!(wbuf[1], MEASUREMENT_ARG_0);
+                        assert_eq!(wbuf[2], MEASUREMENT_ARG_1);
                         self.reading_status = true;
                     }
                     _ => panic!("unknown command"),
