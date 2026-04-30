@@ -8,7 +8,7 @@ license.workspace = true
 
 [package.metadata.feature-groups]
 logging-facade.xor = { features = ["defmt", "log"] }
-logging-tranport.xor = { features = ["defmt-rtt", "esp-println", "uart"] }
+logging-transport.xor = { features = ["defmt-rtt", "esp-println", "uart"] }
 
 [dependencies]
 ariel-os-debug = { workspace = true }
