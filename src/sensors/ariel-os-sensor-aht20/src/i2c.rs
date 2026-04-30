@@ -26,6 +26,11 @@ ariel_os_hal::define_peripherals!(
     Peripherals {}
 );
 
+/// Configuration of the sensor driver and device
+#[derive(Debug, Default)]
+#[non_exhaustive]
+pub struct Config {}
+
 /// Driver to use an AHT20 over I2C.
 pub struct Aht20<I2C> {
     state: AtomicState,
@@ -49,7 +54,12 @@ impl<I2C: I2c + Send> Aht20<I2C> {
     }
 
     /// Initializes the driver.
-    pub async fn init(&'static self, _peripherals: Peripherals, mut i2c_device: I2C) {
+    pub async fn init(
+        &'static self,
+        _peripherals: Peripherals,
+        mut i2c_device: I2C,
+        _config: Config,
+    ) {
         if !self.i2c.is_set() {
             // The Datasheet says that the sensor takes at most 20ms to enter idle state
             #[cfg(not(test))]
