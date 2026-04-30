@@ -391,10 +391,10 @@ mod tests {
                             rbuf[1] = ((samples.0 % (1 << 20)) >> 12) as u8;
                             // Humidity bits 12..4
                             rbuf[2] = ((samples.0 % (1 << 12)) >> 4) as u8;
-                            // Humidity bits 4.. in the upper crumb of the byte
+                            // Humidity bits 4.. in the upper nibble of the byte
                             rbuf[3] = ((samples.0 % (1 << 4)) as u8) << 4;
 
-                            // Temperature bits 20..16 in the lower crumb of the byte
+                            // Temperature bits 20..16 in the lower nibble of the byte
                             rbuf[3] += ((samples.1 % (1 << 20)) >> 16) as u8;
                             // Temperature bits 16..8
                             rbuf[4] = ((samples.1 % (1 << 16)) >> 8) as u8;
