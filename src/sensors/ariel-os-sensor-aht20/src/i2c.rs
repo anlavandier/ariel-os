@@ -307,7 +307,7 @@ impl<I2C: Send> Sensor for Aht20<I2C> {
     }
 
     fn display_name(&self) -> Option<&'static str> {
-        Some("humidity/temperature sensor")
+        Some("humidity & temperature sensor")
     }
 
     fn part_number(&self) -> Option<&'static str> {
