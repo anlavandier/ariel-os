@@ -61,7 +61,7 @@ const PART_NUMBER: &str = "AHT20";
 fn t_accuracy(temp: i32) -> SampleMetadata {
     // See Table 3 and Figure 3 of the datasheet.
     // Accuracy of 0.3 °C between around 20 °C and 60 °C.
-    if 200 <= temp && temp <= 600 {
+    if (200..=600).contains(&temp) {
         SampleMetadata::SymmetricalError {
             deviation: 3,
             bias: 0,
@@ -69,7 +69,7 @@ fn t_accuracy(temp: i32) -> SampleMetadata {
         }
     }
     // Accuracy of 1.5 °C between -40 °C and 20 °C.
-    else if -400 <= temp && temp < 200 {
+    else if (-400..200).contains(&temp) {
         SampleMetadata::SymmetricalError {
             deviation: 15,
             bias: 0,
@@ -93,7 +93,7 @@ fn t_accuracy(temp: i32) -> SampleMetadata {
 fn h_accuracy(humi: i32) -> SampleMetadata {
     // See Table 1 and Figure 2 of the datasheet.
     // Accuracy of 2 %RH between 20 %RH and 80 %RH.
-    if 20 <= humi && humi <= 80 {
+    if (20..=80).contains(&humi) {
         SampleMetadata::SymmetricalError {
             deviation: 2,
             bias: 0,

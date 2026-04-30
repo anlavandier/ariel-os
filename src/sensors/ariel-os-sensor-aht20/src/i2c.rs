@@ -26,7 +26,7 @@ ariel_os_hal::define_peripherals!(
     Peripherals {}
 );
 
-/// Configuration of the sensor driver and device
+/// Configuration of the sensor driver and device.
 #[derive(Debug, Default)]
 #[non_exhaustive]
 pub struct Config {}
