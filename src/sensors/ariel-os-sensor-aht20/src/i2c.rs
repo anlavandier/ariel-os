@@ -120,7 +120,8 @@ impl<I2C: I2c + Send> Aht20<I2C> {
     /// # Errors
     /// - When the I2C connection fails.
     async fn reset(&'static self, i2c_device: &mut I2C) -> Result<(), ()> {
-        i2c_device.write(I2C_ADDRESS, &[crate::Command::SoftReset as u8])
+        i2c_device
+            .write(I2C_ADDRESS, &[crate::Command::SoftReset as u8])
             .await
             .map_err(|_| ())?;
 
@@ -222,8 +223,9 @@ impl<I2C: I2c + Send> Aht20<I2C> {
         }
 
         // The relative humidity and temperature are each encoded on 20 bits, over 5 bytes.
-        let humidity =
-            (i32::from(buf[1]) << 12) + (i32::from(buf[2]) << 4) + i32::from(buf[3] & 0b1111_0000 >> 4);
+        let humidity = (i32::from(buf[1]) << 12)
+            + (i32::from(buf[2]) << 4)
+            + i32::from(buf[3] & 0b1111_0000 >> 4);
         let temperature =
             (i32::from(buf[3] & 0b0000_1111) << 16) + (i32::from(buf[4]) << 8) + i32::from(buf[5]);
 
