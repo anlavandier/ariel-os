@@ -69,10 +69,6 @@ impl<I2C: I2c + Send> Aht20<I2C> {
             if Self::reset(self, &mut i2c_device).await.is_err() {
                 return;
             }
-            // The Datasheet says that the sensor takes at most 20ms to enter idle state
-            // after initial power-on or software reset
-            #[cfg(not(test))]
-            Timer::after_millis(20).await;
 
             // Check for calibration status
             loop {
@@ -126,7 +122,14 @@ impl<I2C: I2c + Send> Aht20<I2C> {
     async fn reset(&'static self, i2c_device: &mut I2C) -> Result<(), ()> {
         i2c_device.write(I2C_ADDRESS, &[crate::Command::SoftReset as u8])
             .await
-            .map_err(|_| ())
+            .map_err(|_| ())?;
+
+        // The Datasheet says that the sensor takes at most 20ms to enter idle state
+        // after initial power-on or software reset
+        #[cfg(not(test))]
+        Timer::after_millis(20).await;
+
+        Ok(())
     }
 
     /// Reads the status register and return it as a u8.
@@ -619,9 +622,10 @@ mod tests {
     fn init_sensor(sht3x: &'static Aht20<I2cDeviceMock>) {
         embassy_futures::block_on(async {
             let peripherals = Peripherals {};
+            let config = Config {};
             let i2c_device = I2cDeviceMock::default();
 
-            sht3x.init(peripherals, i2c_device).await;
+            sht3x.init(peripherals, i2c_device, config).await;
         });
     }
 }
