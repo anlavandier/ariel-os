@@ -43,17 +43,17 @@ const CALIBRATION_STATUS: u8 = 1 << 3;
 const BUSY_BIT: u8 = 1 << 7;
 
 /// Magic argument to be sent with the [`Command::TriggerMeasurement`].
-/// Described in Section 5.3.
+/// Described in Section 5.4.2.
 const MEASUREMENT_ARG_0: u8 = 0x33;
 /// Magic argument to be sent with the [`Command::TriggerMeasurement`].
-/// Described in Section 5.3.
+/// Described in Section 5.4.2.
 const MEASUREMENT_ARG_1: u8 = 0x00;
 
 /// Magic argument to be sent with the [`Command::Initialize`].
-/// Described in Section 5.4 of v1.0 of the datasheet.
+/// Described in Section 5.4.1.
 const INITIALIZE_ARG_0: u8 = 0x08;
 /// Magic argument to be sent with the [`Command::Initialize`].
-/// Described in Section 5.4 of v1.0 of the datasheet.
+/// Described in Section 5.4.1.
 const INITIALIZE_ARG_1: u8 = 0x00;
 
 const PART_NUMBER: &str = "AHT20";
