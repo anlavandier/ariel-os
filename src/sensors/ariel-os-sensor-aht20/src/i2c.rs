@@ -246,7 +246,7 @@ impl<I2C: I2c + Send> Aht20<I2C> {
     }
 }
 
-impl<I2C: I2c + Send> Sensor for Aht20<I2C> {
+impl<I2C: Send> Sensor for Aht20<I2C> {
     fn trigger_measurement(&self) -> Result<(), TriggerMeasurementError> {
         self.reading.clear();
 
