@@ -159,6 +159,7 @@ jobs:
         run: sccache --show-stats
 
       - name: update ref of nightly
+        if: steps.should-skip.outputs.result != 'true'
         run: git rev-parse HEAD > /home/runner/metadata/cache-ref
 
       - name: "Save cache of nightly run"
