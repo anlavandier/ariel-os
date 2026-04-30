@@ -82,8 +82,8 @@ jobs:
               // Read the environment variable, if none use the self-hosted default.
               let runnerLabel = process.env.BUILD_RUNNER || SELF_HOSTED_RUNNER_LABEL;
 
-              // Override the previous value if we have the corresponding PR label.
-              if (prLabels.includes("ci-host:github")) {
+              // Override the previous value if we have the corresponding PR label (doesn't apply when it's a scheduled job).
+              if (prLabels.includes("ci-host:github") && "${{ github.event_name }}" != "schedule") {
                 runnerLabel = GITHUB_HOSTED_RUNNER_LABEL;
               }
 
