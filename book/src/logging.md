@@ -87,7 +87,8 @@ The table below presents those supported in Ariel OS and which hardware and hos
 | [USB CDC-ACM][usb-cdc-acm-glossary-book] | On ESP32 MCUs only      | `logging-over-usb`           | USB cable attached to the user USB port                                                   | Serial monitor                  |
 | [UART][uart-glossary-book]               | On ESP32 MCUs only      | `logging-over-uart`          | USB ⟷ UART adapter attached to the supported UART pins (may already be part of the board) | Serial monitor                  |
 
-On ESP32 devices, Ariel OS uses [`espflash`][espflah-cratesio] by default to obtain and print logs.
+On ESP32 devices, Ariel OS uses [`espflash`][espflah-cratesio] by default to obtain and print logs, whose usage is determined by the `espflash` [laze module][laze-modules-book].
+When `espflash` is selected at the time of compilation, `logging-over-debug-channel` is not enabled and one of the other available logging transports is used instead.
 
 > [!IMPORTANT]
 > When using [`defmt` as logging facade](#defmt), a `defmt`-enabled host tool must be used so that logs are rendered correctly, as `defmt` uses its own encoding on the wire.
