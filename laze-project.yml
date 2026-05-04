@@ -1942,6 +1942,8 @@ modules:
   - name: panic-printing
     help: print panics, on the logging output
     context: ariel-os
+    selects:
+      - logging
     env:
       global:
         FEATURES:
