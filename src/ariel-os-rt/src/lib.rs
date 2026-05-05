@@ -19,27 +19,28 @@ compile_error!(
 
 use ariel_os_log::debug;
 
-cfg_if::cfg_if! {
-    if #[cfg(context = "cortex-m")] {
+cfg_select! {
+    context = "cortex-m" => {
         mod cortexm;
         use cortexm as arch;
     }
-    else if #[cfg(context = "xtensa")] {
+    context = "xtensa" => {
         mod xtensa;
         use xtensa as arch;
     }
-    else if #[cfg(context = "riscv")] {
+    context = "riscv" => {
         mod riscv;
         use riscv as arch;
     }
-    else if #[cfg(context = "native")] {
+    context = "native" => {
         mod native;
         use native as arch;
     }
-    else if #[cfg(context = "ariel-os")] {
+    context = "ariel-os" => {
         // When run with laze but the MCU family is not supported
         compile_error!("no runtime is defined for this MCU family");
-    } else {
+    }
+    _ => {
         // Provide a default implementation, for arch-independent tooling
         #[cfg_attr(not(context = "ariel-os"), allow(dead_code))]
         mod arch {
