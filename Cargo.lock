@@ -519,7 +519,6 @@ dependencies = [
  "ariel-os-macros",
  "ariel-os-threads",
  "ariel-os-utils",
- "cfg-if",
  "cortex-m",
  "cortex-m-rt",
  "embassy-rp",
