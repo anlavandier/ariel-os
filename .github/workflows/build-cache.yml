@@ -9,8 +9,9 @@ on:
         required: false
         type: boolean
   schedule:
-    # run every morning at 00:07am
-    - cron: "7 0 * * *"
+    # run every morning at 00:07am UTC
+    # GitHub action seems to launch them ~4 hours late so we put the trigger 4 hours earlier.
+    - cron: "7 20 * * *"
 concurrency:
   group: ${{ github.head_ref || github.run_id }}-build-cache
   cancel-in-progress: true
