@@ -218,7 +218,6 @@ dependencies = [
  "cbor-edn",
  "cbor-macro",
  "cboritem",
- "cfg-if",
  "coap-handler",
  "coap-handler-implementations",
  "coap-numbers",
