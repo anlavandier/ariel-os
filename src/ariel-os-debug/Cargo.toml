@@ -10,8 +10,8 @@ license.workspace = true
 debug-channel.xor = { features = ["defmt-rtt", "rtt-target"] }
 exit-implementation.xor = { features = ["semihosting", "std"] }
 
-[package.metadata.features]
-debug-channel = { groups = ["debug-channel"] }
+[package.metadata.feature-groups.features]
+debug-channel.requires = { groups = ["debug-channel"] }
 
 [dependencies]
 defmt-rtt = { workspace = true, optional = true }
