@@ -221,7 +221,9 @@ no-boards = [
 ]
 
 # These are selected by laze
-debug-uart = ["ariel-os-embassy/debug-uart", "ariel-os-log/uart"]
+debug-uart = ["ariel-os-embassy/debug-uart", "ariel-os-log/debug-uart"]
+logging-over-uart = ["ariel-os-log/logging-over-uart"]
+logging-over-usb = ["ariel-os-log/logging-over-usb"]
 rtt-target = ["ariel-os-debug/rtt-target"]
 defmt-rtt = ["ariel-os-log/defmt-rtt"]
 esp-println = ["ariel-os-log/esp-println"]

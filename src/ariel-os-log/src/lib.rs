@@ -95,7 +95,11 @@ pub mod log {
 
     #[cfg(all(
         context = "ariel-os",
-        not(any(feature = "esp-println", feature = "std", feature = "uart"))
+        not(any(
+            feature = "esp-println",
+            feature = "logging-over-uart",
+            feature = "std"
+        ))
     ))]
     pub use ariel_os_debug::debug_output_println as println;
 
@@ -105,7 +109,7 @@ pub mod log {
     #[cfg(feature = "std")]
     pub use std::println;
 
-    #[cfg(feature = "uart")]
+    #[cfg(feature = "debug-uart")]
     pub use crate::uart_println as println;
 
     /// Prints to the logging output, with a newline.
@@ -349,7 +353,7 @@ impl<T: AsRef<[u8]>> defmt::Format for Cbor<T> {
     }
 }
 
-#[cfg(feature = "uart")]
+#[cfg(feature = "debug-uart")]
 #[doc(hidden)]
 pub mod backend {
     use embassy_sync::once_lock::OnceLock;

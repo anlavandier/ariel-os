@@ -1877,6 +1877,10 @@ modules:
           - esp-println
     provides_unique:
       - logging-transport
+    env:
+      global:
+        FEATURES:
+          - ariel-os/logging-over-usb
 
   - name: logging-over-uart
     help: use UART as logging transport
@@ -1892,6 +1896,10 @@ modules:
       - ?debug-uart
     provides_unique:
       - logging-transport
+    env:
+      global:
+        FEATURES:
+          - ariel-os/logging-over-uart
 
   # Temporary module for boards that have ad hoc support.
   - name: debug-uart
