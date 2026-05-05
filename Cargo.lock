@@ -321,7 +321,6 @@ dependencies = [
  "ariel-os-threads",
  "ariel-os-utils",
  "bt-hci",
- "cfg-if",
  "critical-section",
  "defmt 1.0.1",
  "embassy-embedded-hal",
