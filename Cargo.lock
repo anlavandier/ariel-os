@@ -356,7 +356,6 @@ dependencies = [
  "ariel-os-rp",
  "ariel-os-stm32",
  "bt-hci",
- "cfg-if",
  "const_panic",
  "embassy-embedded-hal",
  "embassy-executor",
