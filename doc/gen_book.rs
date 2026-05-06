@@ -13,9 +13,6 @@ slug = { version = "0.1" }
 thiserror = { version = "1.0.61" }
 ---
 
-// TODO: remove when upstream fixes issue
-#![allow(unused)]
-
 mod schema;
 
 use std::{
@@ -983,7 +980,6 @@ fn merge_notes(notes: Option<String>, note_snippet_content: Option<Vec<String>>)
     } else {
         return notes;
     }
-    None
 }
 
 #[derive(Debug, thiserror::Error, Diagnostic)]
