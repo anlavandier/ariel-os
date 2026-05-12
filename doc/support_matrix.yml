@@ -1022,6 +1022,13 @@ builders:
       user_usb: not_available
       ethernet_over_usb: not_available
 
+  makerdiary-nrf52840-mdk-usb-dongle:
+    chip: nrf52840
+    tier: "3"
+    support:
+      user_usb: supported
+      ethernet_over_usb: supported
+
   native:
     chip: native-chip
     tier: "1"
@@ -1361,6 +1368,11 @@ boards:
     url: https://web.archive.org/web/20250109121140/https://microbit.org/new-microbit/
     builders:
       - bbc-microbit-v2
+
+  - name: Makerdiary nRF52840 MDK USB Dongle
+    url: https://web.archive.org/web/20260508214910/https://wiki.makerdiary.com/nrf52840-mdk-usb-dongle/
+    builders:
+      - makerdiary-nrf52840-mdk-usb-dongle
 
   - name: native
     url: "#"
