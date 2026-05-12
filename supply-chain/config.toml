@@ -953,10 +953,6 @@ criteria = "safe-to-deploy"
 version = "0.3.10"
 criteria = "safe-to-deploy"
 
-[[exemptions.instant]]
-version = "0.1.13"
-criteria = "safe-to-deploy"
-
 [[exemptions.itertools]]
 version = "0.13.0"
 criteria = "safe-to-deploy"
@@ -1414,15 +1410,7 @@ version = "1.0.2"
 criteria = "safe-to-deploy"
 
 [[exemptions.time]]
-version = "0.3.45"
-criteria = "safe-to-deploy"
-
-[[exemptions.time]]
 version = "0.3.47"
-criteria = "safe-to-deploy"
-
-[[exemptions.time-core]]
-version = "0.1.7"
 criteria = "safe-to-deploy"
 
 [[exemptions.tinyrlibc]]

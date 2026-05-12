@@ -38,6 +38,17 @@ criteria = "safe-to-deploy"
 delta = "0.7.1 -> 1.1.0"
 notes = "No meaningful changes in the rust code or the dependencies"
 
+[[audits.crc]]
+who = "Antoine Lavandier <antoine.lavandier@inria.fr>"
+criteria = "safe-to-deploy"
+delta = "3.3.0 -> 3.4.0"
+notes = """
+The only changes are:
+- Clippy lints
+- some functions are now const fn
+- MSRV was bumped from 1.65 to 1.83
+"""
+
 [[audits.embassy-net-tuntap]]
 who = "chrysn <chrysn@fsfe.org>"
 criteria = "safe-to-deploy"
