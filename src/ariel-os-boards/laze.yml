@@ -76,6 +76,10 @@ builders:
   provides:
   - has_buttons
   - has_leds
+- name: makerdiary-nrf52840-mdk-usb-dongle
+  parent: nrf52840
+  provides:
+  - has_leds
 - name: native
   parent: native-chip
 - name: nordic-thingy-91-x-nrf9151
