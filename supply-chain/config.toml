@@ -465,6 +465,10 @@ criteria = "safe-to-deploy"
 version = "1.0.1"
 criteria = "safe-to-deploy"
 
+[[exemptions.defmt-macros]]
+version = "1.1.0"
+criteria = "safe-to-deploy"
+
 [[exemptions.defmt-or-log]]
 version = "0.2.2"
 criteria = "safe-to-deploy"
